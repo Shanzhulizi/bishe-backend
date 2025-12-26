@@ -1,9 +1,9 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.api.endpoints import auth,characters,users, chat
-
-
+from app.api.v1 import auth,characters, chat
+from app.models import character, message, conversation
+from fastapi import FastAPI
 from sqlalchemy import text
 
 import uvicorn
@@ -14,8 +14,8 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
-from app.database.session import engine, Base, get_db
-from app.models import user, character  # 导入模型
+from app.db.session import engine, Base, get_db
+from app.models import  character  # 导入模型
 # 创建所有表
 Base.metadata.create_all(bind=engine)
 
@@ -50,9 +50,9 @@ async def health_check(db=Depends(get_db)):
     # 测试数据库连接
     try:
         db.execute(text("SELECT 1"))
-        return {"status": "healthy", "database": "connected"}
+        return {"status": "healthy", "db": "connected"}
     except Exception as e:
-        return {"status": "unhealthy", "database": "disconnected", "error": str(e)}
+        return {"status": "unhealthy", "db": "disconnected", "error": str(e)}
 
 
 if __name__ == "__main__":

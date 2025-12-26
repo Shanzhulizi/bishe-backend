@@ -1,6 +1,6 @@
 from pydantic_settings import BaseSettings
 from typing import List
-
+from pydantic_settings import BaseSettings
 import os
 
 
@@ -8,6 +8,13 @@ class Settings(BaseSettings):
     # API配置
     API_V1_STR: str = "/api"
     PROJECT_NAME: str = "AI角色扮演聊天平台"
+
+    # 数据库配置
+    DB_HOST: str
+    DB_PORT: int
+    DB_NAME: str
+    DB_USER: str
+    DB_PASSWORD: str
 
     # CORS配置
     BACKEND_CORS_ORIGINS: List[str] = [
@@ -18,7 +25,13 @@ class Settings(BaseSettings):
     ]
 
     # 数据库配置
-    DATABASE_URL: str = "sqlite:///./ai_chat.db"
+    @property
+    def DATABASE_URL(self) -> str:
+        return (
+            f"postgresql+asyncpg://"
+            f"{self.DB_USER}:{self.DB_PASSWORD}"
+            f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        )
 
     # JWT配置
     SECRET_KEY: str = "your-secret-key-change-this-in-production"
