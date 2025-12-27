@@ -1,23 +1,25 @@
-from fastapi import FastAPI, Depends
-from fastapi.middleware.cors import CORSMiddleware
-from app.core.config import settings
-from app.api.v1 import auth,characters, chat
-from app.models import character, message, conversation
-from fastapi import FastAPI
-from sqlalchemy import text
+import logging
+import platform
 
 import uvicorn
-import logging
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-# 配置日志
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-from app.db.session import engine, Base, get_db
-from app.models import  character  # 导入模型
-# 创建所有表
-Base.metadata.create_all(bind=engine)
+from app.api.v1 import auth, characters, chat
+from app.core.config import settings
+
+from app.core.logging import setup_logging
+import sys
+import asyncio
+if platform.system() == "Windows":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+
+
+
+# 启动日志
+setup_logging()
+
 
 app = FastAPI(
     title="AI角色扮演聊天平台",
@@ -37,22 +39,14 @@ app.add_middleware(
 # 注册路由
 app.include_router(auth.router, prefix="/api/auth", tags=["认证"])
 # app.include_router(users.router, prefix="/api/users", tags=["用户"])
-app.include_router(characters.router, prefix="/api/characters", tags=["角色"])
-app.include_router(chat.router, prefix="/api/chat", tags=["聊天"])
+# app.include_router(characters.router, prefix="/api/characters", tags=["角色"])
+# app.include_router(chat.router, prefix="/api/chat", tags=["聊天"])
 
 @app.get("/")
 async def root():
     return {"message": "AI角色扮演聊天平台API"}
 
 
-@app.get("/health")
-async def health_check(db=Depends(get_db)):
-    # 测试数据库连接
-    try:
-        db.execute(text("SELECT 1"))
-        return {"status": "healthy", "db": "connected"}
-    except Exception as e:
-        return {"status": "unhealthy", "db": "disconnected", "error": str(e)}
 
 
 if __name__ == "__main__":
@@ -60,5 +54,7 @@ if __name__ == "__main__":
         "app.main:app",
         host="127.0.0.1",
         port=8000,
-        reload=True
+        # reload=True,
+
+        loop="asyncio"  # 关键参数
     )

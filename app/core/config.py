@@ -1,7 +1,11 @@
-from pydantic_settings import BaseSettings
+from pathlib import Path
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List
 from pydantic_settings import BaseSettings
 import os
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 class Settings(BaseSettings):
@@ -16,6 +20,15 @@ class Settings(BaseSettings):
     DB_USER: str
     DB_PASSWORD: str
 
+
+    @property
+    def DATABASE_URL(self) -> str:
+        return (
+            f"postgresql+psycopg2://"
+            f"{self.DB_USER}:{self.DB_PASSWORD}"
+            f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        )
+
     # CORS配置
     BACKEND_CORS_ORIGINS: List[str] = [
         "http://localhost:3000",
@@ -24,34 +37,26 @@ class Settings(BaseSettings):
         "http://127.0.0.1:5173"
     ]
 
-    # 数据库配置
-    @property
-    def DATABASE_URL(self) -> str:
-        return (
-            f"postgresql+asyncpg://"
-            f"{self.DB_USER}:{self.DB_PASSWORD}"
-            f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
-        )
+
 
     # JWT配置
     SECRET_KEY: str = "your-secret-key-change-this-in-production"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7天
 
-
-
     # DeepSeek配置
 
     # api_key = os.getenv("DEEPSEEK_API_KEY")
     DEEPSEEK_API_KEY: str
-
     DEEPSEEK_BASE_URL: str = "https://api.deepseek.com/v1"
     DEEPSEEK_MODEL: str = "deepseek-chat"  # 或者 "deepseek-reasoner"
 
-
-    class Config:
-        case_sensitive = True
-        env_file = ".env"
+    # ========== Pydantic v2 配置 ==========
+    model_config = SettingsConfigDict(
+        env_file=BASE_DIR / ".env",
+        env_file_encoding="utf-8",
+        case_sensitive=True,
+    )
 
 
 settings = Settings()

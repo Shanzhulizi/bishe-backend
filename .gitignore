@@ -1,0 +1,7 @@
+# 忽略日志目录（AIChat/app/log/）
+app/log/
+# 忽略测试目录（AIChat/test/）
+tests/
+# 忽略环境变量文件（AIChat/.env）
+.env
+
