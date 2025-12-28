@@ -1,5 +1,8 @@
 from pydantic import BaseModel, EmailStr, Field
 
+from pydantic import BaseModel
+from typing import Optional
+
 
 # 注册请求 Schema
 class UserCreate(BaseModel):
@@ -16,3 +19,25 @@ class UserOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+
+# 登录请求 Schema
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+
+
+class UserDetail(BaseModel):
+    id: int
+    username: str
+    email: str
+    avatar: Optional[str] = None
+
+    class Config:
+        from_attributes = True  # SQLAlchemy ORM 转 Pydantic（非常关键）

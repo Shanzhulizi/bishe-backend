@@ -40,9 +40,9 @@ class Settings(BaseSettings):
 
 
     # JWT配置
-    SECRET_KEY: str = "your-secret-key-change-this-in-production"
-    ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7天
+    JWT_SECRET_KEY: str = "your-secret-key-change-this-in-production"
+    JWT_ALGORITHM: str = "HS256"
+    JWT_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7天
 
     # DeepSeek配置
 

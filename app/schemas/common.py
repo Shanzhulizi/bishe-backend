@@ -11,7 +11,7 @@ class ResponseModel(BaseModel, Generic[T]):
     data: Optional[T] = None
 
     @classmethod
-    def success(cls, data: T = None, msg: str = "响应成功"):
+    def success(cls, msg: str = "响应成功",data: T = None):
         return cls(
             code=ResponseCode.SUCCESS,
             msg=msg,

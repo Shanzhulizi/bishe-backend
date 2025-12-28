@@ -1,14 +1,27 @@
+from http.client import HTTPException
+
+from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.security import get_hash_password
+
+from app.core.constants import ResponseCode
+from app.core.security import get_hash_password, verify_password, create_access_token, decode_access_token
+from app.exceptions import BizException
 from app.models.user import User
 from app.core.logging import get_logger
+from app.repositories.user_repo import UserRepository
+# app/api/deps.py
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.security import decode_access_token
+from app.db.session import get_db
+from app.repositories.user_repo import UserRepository
 logger = get_logger(__name__)
 
 
 def create_user(db: AsyncSession, user_in) -> User:
-
     # 1. 检查用户名是否已存在
     result = db.execute(
         select(User).where(User.username == user_in.username)
@@ -45,4 +58,42 @@ def create_user(db: AsyncSession, user_in) -> User:
         raise
 
     logger.info(f"用户注册完成")
+    return user
+
+
+def user_login(db: AsyncSession, username: str, password: str) -> str:
+    user = UserRepository.get_by_username(db, username)
+    logger.info(f"用户登录服务 {user.username}")
+    if not user:
+        logger.warning(f"用户{username}不存在")
+        raise BizException(ResponseCode.USER_NOT_FOUND)
+    if not verify_password(password, user.password_hash):
+        logger.warning(f"用户{username}密码错误")
+        raise BizException(ResponseCode.PASSWORD_ERROR)
+    if not user.is_active:
+        logger.warning(f"用户{username}已停用")
+        raise BizException(ResponseCode.USER_DISABLED)
+
+    return create_access_token(username)
+
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
+
+
+
+def get_current_user(token: str = Depends(oauth2_scheme),
+    db: AsyncSession = Depends(get_db)
+                     ) :
+    payload = decode_access_token(token)
+    if not payload:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED
+        )
+    username = payload.get("sub")
+    if not username:
+        raise HTTPException(status_code=401, detail="token 缺少 username")
+    user = UserRepository.get_by_username(db, username)
+
+    if not user:
+        raise HTTPException(status_code=401, detail="用户不存在")
+
     return user
