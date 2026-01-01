@@ -20,4 +20,4 @@ class CharacterResponse(BaseModel):
     persona: Optional[Dict] = None  # 对应 CharacterConfigs.persona
 
     class Config:
-        orm_mode = True  # 支持从 ORM 模型直接生成 Pydantic 对象
+        from_attributes = True
