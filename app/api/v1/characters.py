@@ -21,10 +21,9 @@ def create_character(data: CharacterCreate, db: Session = Depends(get_db)):
     return {
         "id": char.id,
         "name": char.name,
+        "avatar": char.avatar,
         "description": char.description,
         "worldview": char.worldview,
         "is_active": True ,
-        "speech_style": char.speech_style,
         "persona": char.config.persona if char.config else {}
-
     }

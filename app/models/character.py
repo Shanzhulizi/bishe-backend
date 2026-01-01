@@ -9,11 +9,12 @@ class Character(Base):
     name = Column(String(50), nullable=False)
     description = Column(Text, nullable=True)
     worldview = Column(Text, nullable=True)
-    speech_style = Column(Text, nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now())
 
+    avatar = Column(Text, nullable=True)  # 👈 新增
+    # voice = Column(Text, nullable=True)   # 👈 新增
     # 关联角色配置
     config = relationship(
         "CharacterConfigs",
