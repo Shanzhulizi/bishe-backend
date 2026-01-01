@@ -25,3 +25,5 @@ def get_db():
         raise e
     finally:
         db.close()
+
+

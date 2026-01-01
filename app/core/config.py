@@ -1,9 +1,8 @@
 from pathlib import Path
-
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List
+
 from pydantic_settings import BaseSettings
-import os
+from pydantic_settings import SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 

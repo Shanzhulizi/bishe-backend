@@ -1,15 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, HTTPException, Request
+
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
-from datetime import timedelta
-from fastapi import Request
+
 from app.core.constants import ResponseCode
+from app.core.logging import get_logger
 from app.db.session import get_db
 from app.schemas.common import ResponseModel
 from app.schemas.user import *
 from app.services.user_service import create_user, user_login, get_current_user
-from app.core.logging import get_logger
 
 logger = get_logger(__name__)
 
@@ -77,7 +75,7 @@ def me(
     try:
         user_profile = get_current_user(token, db)
 
-        logger.info(f"用户信息：{user_profile.id}")
+        logger.info(f"用户id：{user_profile.id}")
         return ResponseModel.success(
             msg="查询成功",
             data=user_profile,

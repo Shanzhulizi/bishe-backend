@@ -39,7 +39,7 @@ app.add_middleware(
 # 注册路由
 app.include_router(auth.router, prefix="/api/auth", tags=["认证"])
 # app.include_router(users.router, prefix="/api/users", tags=["用户"])
-# app.include_router(characters.router, prefix="/api/characters", tags=["角色"])
+app.include_router(characters.router, prefix="/api/characters", tags=["角色"])
 # app.include_router(chat.router, prefix="/api/chat", tags=["聊天"])
 
 @app.get("/")
