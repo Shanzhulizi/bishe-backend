@@ -1,4 +1,6 @@
+from fastapi import HTTPException
 from openai.types.beta.realtime import Session
+from starlette import status
 
 from app.persona.builder import PersonaBuilder
 from app.repositories.character_repo import CharacterRepository
@@ -20,3 +22,15 @@ class CharacterService:
             persona=persona
 
         )
+
+    def get_character_by_id(self, db, character_id):
+        char = self.repo.get_basic_by_id(db, character_id)
+        if not char:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="角色不存在"
+            )
+        return char
+
+    def get_all_characters_basic(self, db: Session):
+        return self.repo.get_all_basic(db)

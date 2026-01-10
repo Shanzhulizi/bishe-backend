@@ -1,7 +1,7 @@
 from typing import Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.models.character import Character
 from app.models.character_configs import CharacterConfigs
@@ -40,3 +40,24 @@ class CharacterRepository:
         db.commit()
         db.refresh(char)
         return char
+
+    # def get_by_id(self, db: Session, character_id: int) -> Character | None:
+    #     return (
+    #         db.query(Character)
+    #             .options(joinedload(Character.config))  # 一次性加载 persona
+    #             .filter(Character.id == character_id)
+    #             .first()
+    #     )
+
+    def get_basic_by_id(self, db: Session, character_id: int) -> Character | None:
+        return db.query(Character).filter(Character.id == character_id).first()
+
+    # 获取所有角色的基本信息
+    def get_all_basic(self, db: Session):
+        return db.query(
+            Character.id,
+            Character.name,
+            Character.avatar,
+            Character.description
+        ).all()
+
