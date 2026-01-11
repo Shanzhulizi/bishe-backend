@@ -1,6 +1,8 @@
 from sqlalchemy import Column, BigInteger, String, Text, Boolean, TIMESTAMP, func
 from sqlalchemy.orm import relationship
+
 from app.db.base import Base  # declarative_base
+
 
 class Character(Base):
     __tablename__ = "character"

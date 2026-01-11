@@ -1,12 +1,9 @@
 from typing import Optional
 
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
 from app.models.character import Character
 from app.models.character_configs import CharacterConfigs
-from app.schemas.character import CharacterCreate
-from app.persona.builder import PersonaBuilder
 
 
 class CharacterRepository:

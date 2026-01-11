@@ -1,23 +1,20 @@
 from http.client import HTTPException
 
+# app/api/deps.py
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.constants import ResponseCode
-from app.core.security import get_hash_password, verify_password, create_access_token, decode_access_token
+from app.core.logging import get_logger
+from app.core.security import decode_access_token
+from app.core.security import get_hash_password, verify_password, create_access_token
+from app.db.session import get_db
 from app.exceptions import BizException
 from app.models.user import User
-from app.core.logging import get_logger
 from app.repositories.user_repo import UserRepository
-# app/api/deps.py
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.security import decode_access_token
-from app.db.session import get_db
-from app.repositories.user_repo import UserRepository
 logger = get_logger(__name__)
 
 

@@ -1,5 +1,6 @@
 from sqlalchemy import Column, BigInteger, JSON, TIMESTAMP, func, ForeignKey
 from sqlalchemy.orm import relationship
+
 from app.db.base import Base
 
 

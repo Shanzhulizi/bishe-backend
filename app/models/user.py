@@ -1,7 +1,7 @@
 from sqlalchemy import Column, BigInteger, String, Boolean, TIMESTAMP, text, Text
+from sqlalchemy.dialects.postgresql import JSONB
 
 from app.db.base import Base
-from sqlalchemy.dialects.postgresql import JSONB
 
 
 class User(Base):

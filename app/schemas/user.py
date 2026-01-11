@@ -1,7 +1,7 @@
-from pydantic import BaseModel, EmailStr, Field
+from typing import Optional
 
 from pydantic import BaseModel
-from typing import Optional
+from pydantic import EmailStr, Field
 
 
 # 注册请求 Schema

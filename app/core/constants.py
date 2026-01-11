@@ -23,7 +23,7 @@ class ResponseCode(IntEnum):
     # ===== 角色 / 聊天 =====
     CHARACTER_NOT_FOUND = 40001
     CHAT_FORBIDDEN = 40002
-
+    NOT_FOUND = 40004
     # ===== AI / 系统 =====
     MODEL_ERROR = 50001
     RATE_LIMIT = 50002

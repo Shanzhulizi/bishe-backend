@@ -1,9 +1,6 @@
-import string
+from typing import Optional
 
-from pydantic import BaseModel
-from typing import Optional, Dict
 from pydantic import BaseModel, Field
-from typing import Optional, Dict
 
 
 class DialogueStyle(BaseModel):
