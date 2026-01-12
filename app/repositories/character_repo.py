@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.models.character import Character
 from app.models.character_configs import CharacterConfigs
@@ -38,13 +38,15 @@ class CharacterRepository:
         db.refresh(char)
         return char
 
-    # def get_by_id(self, db: Session, character_id: int) -> Character | None:
-    #     return (
-    #         db.query(Character)
-    #             .options(joinedload(Character.config))  # 一次性加载 persona
-    #             .filter(Character.id == character_id)
-    #             .first()
-    #     )
+    # 不确定是否可用
+    @staticmethod
+    def get_by_id( db: Session, character_id: int) -> Character | None:
+        return (
+            db.query(Character)
+                .options(joinedload(Character.config))  # 一次性加载 persona
+                .filter(Character.id == character_id)
+                .first()
+        )
 
     def get_basic_by_id(self, db: Session, character_id: int) -> Character | None:
         return db.query(Character).filter(Character.id == character_id).first()

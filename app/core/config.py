@@ -45,9 +45,8 @@ class Settings(BaseSettings):
 
     # DeepSeek配置
 
-    # api_key = os.getenv("DEEPSEEK_API_KEY")
     DEEPSEEK_API_KEY: str
-    DEEPSEEK_BASE_URL: str = "https://api.deepseek.com/v1"
+    DEEPSEEK_BASE_URL: str = "https://api.deepseek.com/chat/completions"
     DEEPSEEK_MODEL: str = "deepseek-chat"  # 或者 "deepseek-reasoner"
 
     # ========== Pydantic v2 配置 ==========

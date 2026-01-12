@@ -71,26 +71,7 @@ def user_login(db: AsyncSession, username: str, password: str) -> str:
         logger.warning(f"用户{username}已停用")
         raise BizException(ResponseCode.USER_DISABLED)
 
-    return create_access_token(username)
-
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
+    return create_access_token(str(user.id))
 
 
 
-def get_current_user(token: str = Depends(oauth2_scheme),
-    db: AsyncSession = Depends(get_db)
-                     ) :
-    payload = decode_access_token(token)
-    if not payload:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED
-        )
-    username = payload.get("sub")
-    if not username:
-        raise HTTPException(status_code=401, detail="token 缺少 username")
-    user = UserRepository.get_by_username(db, username)
-
-    if not user:
-        raise HTTPException(status_code=401, detail="用户不存在")
-
-    return user

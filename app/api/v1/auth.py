@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.deps import get_current_user, get_db
 from app.core.constants import ResponseCode
 from app.core.logging import get_logger
-from app.db.session import get_db
 from app.schemas.common import ResponseModel
 from app.schemas.user import *
-from app.services.user_service import create_user, user_login, get_current_user
+from app.services.user_service import create_user, user_login
 
 logger = get_logger(__name__)
 
@@ -58,7 +58,7 @@ def login(
 
 
 @router.get("/me", response_model=ResponseModel[UserDetail])
-def me(
+async def me(
         request: Request,
         db: AsyncSession = Depends(get_db),
 ):
@@ -72,7 +72,7 @@ def me(
 
     logger.info(f"获取用户信息: {token}")
     try:
-        user_profile = get_current_user(token, db)
+        user_profile = await get_current_user(token, db)
 
         logger.info(f"用户id：{user_profile.id}")
         return ResponseModel.success(

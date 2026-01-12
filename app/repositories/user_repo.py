@@ -15,7 +15,7 @@ class UserRepository:
 
 
     @staticmethod
-    async def get_by_id(db: AsyncSession, user_id: int) -> User | None:
+    async def get_by_id(db: Session, user_id: int) -> User | None:
         stmt = select(User).where(User.id == user_id)
-        result = await db.execute(stmt)
+        result = db.execute(stmt)
         return result.scalars().first()

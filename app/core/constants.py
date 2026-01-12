@@ -24,6 +24,7 @@ class ResponseCode(IntEnum):
     CHARACTER_NOT_FOUND = 40001
     CHAT_FORBIDDEN = 40002
     NOT_FOUND = 40004
+    SERVICE_ERROR = 40005
     # ===== AI / 系统 =====
     MODEL_ERROR = 50001
     RATE_LIMIT = 50002
