@@ -11,9 +11,9 @@ class MessageRepository:
             db: Session,
             conversation_id: int,
             sender_type: str,
-        content: str,
-        token_count: int | None = None,
-        in_context: bool = True
+            content: str,
+            token_count: int | None = None,
+            in_context: bool = True
 
     ) -> Message:
         message = Message(
@@ -28,22 +28,20 @@ class MessageRepository:
         db.refresh(message)
         return message
 
-
-
     @staticmethod
     async def get_messages_by_conversation(
             db: Session,
             conversation_id: int,
-            limit: int =20
+            limit: int = 20
     ) -> list[Message]:
         stmt = (
             select(Message)
-            .where(
+                .where(
                 Message.conversation_id == conversation_id,
                 Message.in_context.is_(True)
             )
-            .order_by(Message.created_at.desc())
-            .limit(limit)
+                .order_by(Message.created_at.desc())
+                .limit(limit)
         )
-        result =  db.execute(stmt)
+        result = db.execute(stmt)
         return result.scalars().all()

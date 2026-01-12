@@ -1,8 +1,7 @@
-from app.db.base import Base  # declarative_base
-
-
 from sqlalchemy import Column, BigInteger, String, Text, Boolean, TIMESTAMP, func, ForeignKey
 from sqlalchemy.orm import relationship
+
+from app.db.base import Base  # declarative_base
 
 
 class Conversation(Base):

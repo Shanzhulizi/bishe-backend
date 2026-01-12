@@ -3,8 +3,9 @@
 
 """
 
-import httpx
 from typing import List, Dict
+
+import httpx
 
 from app.ai.schemas import LLMResponse, LLMUsage
 from app.core.config import settings

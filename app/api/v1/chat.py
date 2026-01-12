@@ -1,16 +1,7 @@
-import logging
-from typing import List
-import httpx
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db
-from app.core.config import settings
-from app.core.constants import ResponseCode
-from app.repositories.character_repo import CharacterRepository
 from app.schemas.chat import ChatRequest, ChatResponse
-from app.schemas.common import ResponseModel
-from app.services.character_service import CharacterService
 from app.services.chat_service import ChatService
 
 router = APIRouter()

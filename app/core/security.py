@@ -33,7 +33,6 @@ def create_access_token(subject: str, expires_delta: timedelta = None):
     return encoded_jwt
 
 
-
 def decode_access_token(token: str) -> dict | None:
     """解码JWT token"""
     try:

@@ -1,23 +1,12 @@
-from pydantic import Field
-from sqlalchemy.ext.asyncio import AsyncSession
+import logging
+
+from sqlalchemy.orm import Session
 
 from app.ai.client import chat_completion
 from app.ai.prompt_builder import build_system_prompt
-from app.repositories.conversation_repo import ConversationRepository
-
-import logging
-from typing import List
-import httpx
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-from app.core.config import settings
-from app.core.constants import ResponseCode
-from app.db.session import get_db
 from app.repositories.character_repo import CharacterRepository
+from app.repositories.conversation_repo import ConversationRepository
 from app.repositories.message_repo import MessageRepository
-from app.schemas.chat import ChatRequest, ChatResponse, ChatMessage
-from app.schemas.common import ResponseModel
-from app.services.character_service import CharacterService
 
 
 class ChatService:
@@ -49,7 +38,6 @@ class ChatService:
             # 这句话的作用是 裁剪历史消息的长度，保证传给 LLM 的上下文不会太长
             recent_history = history_msgs[-max_history:] if len(history_msgs) > max_history else history_msgs
 
-
             message_history = [
                 {
                     "role": "user" if msg.sender_type == "user" else "assistant",
@@ -65,8 +53,8 @@ class ChatService:
             # })
 
             # 4️⃣ 构建 system prompt + 历史
-            character =  CharacterRepository.get_by_id(db, character_id)
-            messages_for_llm = build_system_prompt(character,content, message_history)
+            character = CharacterRepository.get_by_id(db, character_id)
+            messages_for_llm = build_system_prompt(character, content, message_history)
 
             # 4️⃣ 调用 LLM
             llm_resp = await chat_completion(messages_for_llm)

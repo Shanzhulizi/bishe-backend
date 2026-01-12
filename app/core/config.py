@@ -19,7 +19,6 @@ class Settings(BaseSettings):
     DB_USER: str
     DB_PASSWORD: str
 
-
     @property
     def DATABASE_URL(self) -> str:
         return (
@@ -35,8 +34,6 @@ class Settings(BaseSettings):
         "http://127.0.0.1:3000",
         "http://127.0.0.1:5173"
     ]
-
-
 
     # JWT配置
     JWT_SECRET_KEY: str = "your-secret-key-change-this-in-production"

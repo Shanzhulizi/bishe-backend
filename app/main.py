@@ -12,12 +12,8 @@ from app.core.logging import setup_logging
 if platform.system() == "Windows":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-
-
-
 # 启动日志
 setup_logging()
-
 
 app = FastAPI(
     title="AI角色扮演聊天平台",
@@ -40,11 +36,10 @@ app.include_router(auth.router, prefix="/api/auth", tags=["认证"])
 app.include_router(characters.router, prefix="/api/characters", tags=["角色"])
 app.include_router(chat.router, prefix="/api/chat", tags=["聊天"])
 
+
 @app.get("/")
 async def root():
     return {"message": "AI角色扮演聊天平台API"}
-
-
 
 
 if __name__ == "__main__":

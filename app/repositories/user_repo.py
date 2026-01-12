@@ -1,6 +1,4 @@
-
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
 from app.models.user import User
@@ -12,7 +10,6 @@ class UserRepository:
         stmt = select(User).where(User.username == username)
         result = db.execute(stmt)
         return result.scalars().first()
-
 
     @staticmethod
     async def get_by_id(db: Session, user_id: int) -> User | None:

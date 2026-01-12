@@ -1,7 +1,7 @@
-
 from typing import List, Dict
 
-def build_system_prompt(character,content: str, history: List[Dict] = None) -> List[Dict]:
+
+def build_system_prompt(character, content: str, history: List[Dict] = None) -> List[Dict]:
     system_msg = f"""你正在扮演一个角色，请完全沉浸在这个角色中。
 
     角色名称：{character.name}

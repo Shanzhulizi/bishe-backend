@@ -6,13 +6,14 @@ from app.core.constants import ResponseCode
 
 T = TypeVar('T')
 
+
 class ResponseModel(BaseModel, Generic[T]):
     code: int
     msg: str
     data: Optional[T] = None
 
     @classmethod
-    def success(cls, msg: str = "响应成功",data: T = None):
+    def success(cls, msg: str = "响应成功", data: T = None):
         return cls(
             code=ResponseCode.SUCCESS,
             msg=msg,

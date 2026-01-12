@@ -1,7 +1,3 @@
-
-from sqlalchemy import select
-from sqlalchemy.orm import Session
-
 from sqlalchemy import (
     Column,
     BigInteger,
@@ -52,4 +48,3 @@ class Message(Base):
         "Conversation",
         back_populates="messages"
     )
-

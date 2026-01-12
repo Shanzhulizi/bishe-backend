@@ -40,7 +40,7 @@ class CharacterRepository:
 
     # 不确定是否可用
     @staticmethod
-    def get_by_id( db: Session, character_id: int) -> Character | None:
+    def get_by_id(db: Session, character_id: int) -> Character | None:
         return (
             db.query(Character)
                 .options(joinedload(Character.config))  # 一次性加载 persona
@@ -59,4 +59,3 @@ class CharacterRepository:
             Character.avatar,
             Character.description
         ).all()
-

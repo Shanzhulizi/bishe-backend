@@ -34,7 +34,6 @@ class Persona(BaseModel):
     memory_strategy: MemoryStrategy
 
 
-
 class CharacterCreate(BaseModel):
     name: str
     avatar: Optional[str] = None
@@ -50,13 +49,8 @@ class CharacterResponse(BaseModel):
     avatar: Optional[str] = None
     description: Optional[str] = None
     worldview: Optional[str] = None
-    is_active: bool= True
+    is_active: bool = True
     persona: Optional[Persona] = None  # 对应 CharacterConfigs.persona
 
     class Config:
         from_attributes = True
-
-
-
-
-

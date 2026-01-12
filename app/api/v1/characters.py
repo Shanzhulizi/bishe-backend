@@ -24,10 +24,9 @@ def create_character(data: CharacterCreate, db: Session = Depends(get_db)):
         "avatar": char.avatar,
         "description": char.description,
         "worldview": char.worldview,
-        "is_active": True ,
+        "is_active": True,
         "persona": char.config.persona if char.config else {}
     }
-
 
 
 @router.get("/list")
@@ -38,13 +37,15 @@ def list_characters(db: Session = Depends(get_db)):
     chars = service.get_all_characters_basic(db)
     logging.info(f"获取所有角色基本信息成功，数量：{len(chars)}")
     # 返回统一格式
-    return ResponseModel.success(data=[dict(id=c.id, name=c.name, avatar=c.avatar, description=c.description) for c in chars])
+    return ResponseModel.success(
+        data=[dict(id=c.id, name=c.name, avatar=c.avatar, description=c.description) for c in chars])
 
 
 """
 /api/characters/list 被 误匹配到了 /api/characters/{id} 这个接口上
 所以，id这个接口放到了最后
 """
+
 
 @router.get("/{character_id}", response_model=CharacterResponse)
 def get_character_by_id(character_id: int, db: Session = Depends(get_db)):
@@ -59,6 +60,3 @@ def get_character_by_id(character_id: int, db: Session = Depends(get_db)):
         "avatar": char.avatar,
         "description": char.description,
     }
-
-
-

@@ -9,7 +9,7 @@ class ConversationRepository:
     @staticmethod
     async def get_active(
             db: Session,
-            user_id: int ,
+            user_id: int,
             character_id: int
     ) -> Conversation | None:
         stmt = select(Conversation).where(
@@ -38,11 +38,11 @@ class ConversationRepository:
         db.refresh(conversation)
         return conversation
 
-
     """
         这个啥意思？
         
     """
+
     @staticmethod
     async def touch(db: Session, conv: Conversation):
         conv.last_message_at = func.now()
