@@ -1,12 +1,13 @@
-import logging
-
 from sqlalchemy.orm import Session
 
 from app.ai.client import chat_completion
 from app.ai.prompt_builder import build_system_prompt
+from app.core.logging import get_logger
 from app.repositories.character_repo import CharacterRepository
 from app.repositories.conversation_repo import ConversationRepository
 from app.repositories.message_repo import MessageRepository
+
+logger = get_logger(__name__)
 
 
 class ChatService:
@@ -46,16 +47,12 @@ class ChatService:
                 for msg in recent_history
             ]
 
-            # # 把当前用户输入也加入 prompt（但还不入库）
-            # message_history.append({
-            #     "role": "user",
-            #     "content": content
-            # })
+
 
             # 4️⃣ 构建 system prompt + 历史
             character = CharacterRepository.get_by_id(db, character_id)
             messages_for_llm = build_system_prompt(character, content, message_history)
-
+            logger.info(f"Messages for LLM: {messages_for_llm}")
             # 4️⃣ 调用 LLM
             llm_resp = await chat_completion(messages_for_llm)
 
@@ -88,5 +85,5 @@ class ChatService:
         except Exception as e:
             db.rollback()
             # 记录日志（非常重要）
-            logging.exception("send_message failed", exc_info=e)
+            logger.exception("send_message failed", exc_info=e)
             raise

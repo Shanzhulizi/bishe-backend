@@ -5,7 +5,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1 import auth, characters, chat
+from app.api.v1 import auth, characters, chat, conversation
 from app.core.config import settings
 from app.core.logging import setup_logging
 
@@ -35,6 +35,7 @@ app.include_router(auth.router, prefix="/api/auth", tags=["认证"])
 # app.include_router(users.router, prefix="/api/users", tags=["用户"])
 app.include_router(characters.router, prefix="/api/characters", tags=["角色"])
 app.include_router(chat.router, prefix="/api/chat", tags=["聊天"])
+app.include_router(conversation.router, prefix="/api/conversation", tags=["对话"])
 
 
 @app.get("/")

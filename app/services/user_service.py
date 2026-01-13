@@ -19,7 +19,7 @@ def create_user(db: AsyncSession, user_in) -> User:
     )
 
     if result.scalar_one_or_none():
-        logger.waring(f"用户{user_in.username}已存在")
+        logger.warning(f"用户{user_in.username}已存在")
         raise ValueError("Username already exists")
 
     # 2. 查重（email）
