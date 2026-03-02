@@ -8,3 +8,9 @@ tests/
 models
 # 下载模型用的代码
 download_model.py
+
+app/static/*
+
+app/logs/*
+
+.gitignore
