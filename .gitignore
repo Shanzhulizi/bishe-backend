@@ -4,4 +4,7 @@ app/log/
 tests/
 # 忽略环境变量文件（AIChat/.env）
 .env
-
+# 下载的模型存放目录
+models
+# 下载模型用的代码
+download_model.py

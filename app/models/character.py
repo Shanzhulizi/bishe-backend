@@ -16,7 +16,11 @@ class Character(Base):
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now())
 
     avatar = Column(Text, nullable=True)  # 👈 新增
-    # voice = Column(Text, nullable=True)   # 👈 新增
+    voice_style = Column(
+        String(32),
+        nullable=False,
+        default="default"
+    )
     # 关联角色配置
     config = relationship(
         "CharacterConfigs",

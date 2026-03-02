@@ -4,10 +4,12 @@ import platform
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.staticfiles import StaticFiles
 
-from app.api.v1 import auth, characters, chat, conversation
+from app.api.v1 import auth, characters, chat, conversation,voice
 from app.core.config import settings
 from app.core.logging import setup_logging
+from app.services.ars_service import ASRService
 
 if platform.system() == "Windows":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -36,12 +38,22 @@ app.include_router(auth.router, prefix="/api/auth", tags=["认证"])
 app.include_router(characters.router, prefix="/api/characters", tags=["角色"])
 app.include_router(chat.router, prefix="/api/chat", tags=["聊天"])
 app.include_router(conversation.router, prefix="/api/conversation", tags=["对话"])
+app.include_router(voice.router, prefix="/api/voice", tags=["语音"])
 
 
 @app.get("/")
 async def root():
     return {"message": "AI角色扮演聊天平台API"}
 
+app.mount(
+    "/static",
+    StaticFiles(directory="static"),
+    name="static"
+)
+
+# @app.onmodel()_event("startup")
+# async def startup_event():
+#     ASRService.get_  # 预加载模型
 
 if __name__ == "__main__":
     uvicorn.run(

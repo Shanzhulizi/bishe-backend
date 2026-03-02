@@ -53,5 +53,6 @@ class Settings(BaseSettings):
         case_sensitive=True,
     )
 
-
+    # 语音文件存储路径
+    STATIC_DIR: str = str(BASE_DIR / "app" / "static")
 settings = Settings()

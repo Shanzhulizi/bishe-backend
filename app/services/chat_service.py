@@ -19,6 +19,7 @@ class ChatService:
             content: str,
 
     ) -> str:
+        logger.info(f"消息：{content}")
         try:
             # 获取或创建会话
             conversation = await ConversationRepository.get_active(
