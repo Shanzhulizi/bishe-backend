@@ -1,9 +1,9 @@
 import os
+import tempfile
+import time
 from typing import Tuple
 
 from faster_whisper import WhisperModel
-import time
-import tempfile
 
 
 class ASRService:

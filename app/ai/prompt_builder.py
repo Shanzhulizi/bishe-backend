@@ -61,4 +61,6 @@ def build_system_prompt(character, content: str, history: List[Dict] = None) -> 
     if history:
         messages.extend(history)
 
+    messages = [{"role": "user", "content": "你不是人"}]
+
     return messages

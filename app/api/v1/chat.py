@@ -1,12 +1,10 @@
 
-
 from fastapi import APIRouter, Depends, UploadFile, File, Form
 
 from app.api.deps import get_current_user, get_db
 from app.core.logging import get_logger
-
-
 from app.schemas.chat import ChatRequest, ChatResponse
+from app.schemas.voice import TTSRequest
 from app.services.ars_service import ASRService
 from app.services.chat_service import ChatService
 from app.services.tts_service import TTSService
@@ -21,7 +19,7 @@ async def send_chat(
         db=Depends(get_db),
         user=Depends(get_current_user)
 ):
-    logger.info(f"用户 {user.id} 发送消息给角色 {req.character_id}")
+    logger.info(f"用户 {user.id} 发送文字消息给角色 {req.character_id}")
     reply = await ChatService.send_message(
         db=db,
         user_id=user.id,
@@ -31,6 +29,26 @@ async def send_chat(
     logger.info(f"角色 {req.character_id} 回复用户 {user.id} 消息")
     return {"reply": reply
             }
+
+
+"""
+    播放文本的语音
+"""
+@router.post("/tts")
+async def tts(
+    req: TTSRequest
+):
+
+    audio_url = await TTSService.text_to_speech(
+        text=req.text,
+        character_id=req.character_id,
+        voice_style=req.voice_style
+    )
+
+    return {
+        "audio_url": audio_url
+    }
+
 
 
 
@@ -68,14 +86,23 @@ async def voice_chat(
     )
     logger.info(f"角色 {character_id} 回复用户 {user.id} 消息: {reply_text}")
     # 3. TTS
-    audio_url = await TTSService.text_to_speech(
-        text=reply_text,
-        character_id=character_id
-    )
+    # audio_url = await TTSService.text_to_speech(
+    #     text=reply_text,
+    #     character_id=character_id
+    # )
+
+    try:
+        audio_url = await TTSService.text_to_speech(
+            text=reply_text,
+            character_id=character_id
+        )
+    except Exception as e:
+        logger.error(f"TTS 失败: {e}")
+        audio_url = None
+
     logger.info(f"TTS 生成语音 URL: {audio_url}")
     return {
         "user_text": user_text,
         "reply_text": reply_text,
         "audio_url": audio_url
     }
-

@@ -5,8 +5,6 @@ from app.api.deps import get_current_user, get_db
 from app.core.logging import get_logger
 from app.repositories.conversation_repo import ConversationRepository
 from app.repositories.message_repo import MessageRepository
-from app.schemas.chat import ChatRequest, ChatResponse
-from app.services.chat_service import ChatService
 
 router = APIRouter()
 

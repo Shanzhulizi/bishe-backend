@@ -3,13 +3,10 @@
 
 from fastapi import APIRouter, Depends, UploadFile, File
 
-from app.api.deps import get_current_user, get_db
+from app.api.deps import get_current_user
 from app.core.logging import get_logger
-
-from app.schemas.chat import ChatRequest, ChatResponse
 from app.schemas.voice import ASRResponse, TTSResponse, TTSRequest
 from app.services.ars_service import ASRService
-from app.services.chat_service import ChatService
 from app.services.tts_service import TTSService
 
 router = APIRouter()
