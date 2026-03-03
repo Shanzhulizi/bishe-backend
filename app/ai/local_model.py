@@ -79,3 +79,42 @@ async def local_model_chat(messages: list) -> SimpleNamespace:  # 改为返回 S
     except Exception as e:
         logger.error(f"本地模型调用失败: {str(e)}")
         raise Exception(f"本地模型调用失败: {str(e)}")
+
+
+async def local_model_chat_stream(messages: list):
+    try:
+        ollama_messages = [
+            {
+                "role": msg["role"],
+                "content": msg["content"]
+            }
+            for msg in messages
+        ]
+
+        stream = ollama.chat(
+            model="qwen2.5:7b",
+            messages=ollama_messages,
+            stream=True,
+            options={
+                "temperature": 0.7,
+                "num_predict": 2000,
+                "top_k": 40,
+                "top_p": 0.9,
+                "repeat_penalty": 1.1
+            }
+        )
+
+        chunk_count = 0
+        for chunk in stream:
+            chunk_count += 1
+            if "message" in chunk:
+                token = chunk["message"]["content"]
+                # print(f"发送第{chunk_count}个chunk: {token[:20]}...")
+                if token:
+                    yield token
+
+    except Exception as e:
+        print(f"Ollama流式输出错误: {e}")
+        import traceback
+        traceback.print_exc()
+        yield f"【系统错误】{str(e)}"

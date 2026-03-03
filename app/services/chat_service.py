@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from app.ai.client import chat_completion
+from app.ai.client import chat_completion, chat_completion_stream
 from app.ai.prompt_builder import build_system_prompt
 from app.core.logging import get_logger
 from app.repositories.character_repo import CharacterRepository
@@ -88,3 +88,73 @@ class ChatService:
             # 记录日志（非常重要）
             logger.exception("send_message failed", exc_info=e)
             raise
+
+    @staticmethod
+    async def send_message_stream(
+            db: Session,
+            user_id: int,
+            character_id: int,
+            content: str,
+    ):
+
+        reply_buffer = ""
+
+        # 获取或创建会话
+        conversation = await ConversationRepository.get_active(
+            db, user_id, character_id
+        )
+        if not conversation:
+            conversation = await ConversationRepository.create(
+                db, user_id, character_id
+            )
+
+        # 准备消息历史记录（最近 N 条）
+        history_msgs = await MessageRepository.get_messages_by_conversation(
+            db, conversation.id
+        )
+
+        # 限制历史长度
+        max_history = 10
+        # 这句话的作用是 裁剪历史消息的长度，保证传给 LLM 的上下文不会太长
+        recent_history = history_msgs[-max_history:] if len(history_msgs) > max_history else history_msgs
+
+        message_history = [
+            {
+                "role": "user" if msg.sender_type == "user" else "assistant",
+                "content": msg.content
+            }
+            for msg in recent_history
+        ]
+
+        # 4️⃣ 构建 system prompt + 历史
+        character = CharacterRepository.get_by_id(db, character_id)
+        messages_for_llm = build_system_prompt(character, content, message_history)
+
+        try:
+            async for token in chat_completion_stream(messages_for_llm):
+                reply_buffer += token
+
+                yield token
+        finally:
+            # ===== 流结束之后 =====
+            try:
+                await MessageRepository.create(
+                    db,
+                    conversation_id=conversation.id,
+                    sender_type="user",
+                    content=content
+                )
+
+                await MessageRepository.create(
+                    db,
+                    conversation_id=conversation.id,
+                    sender_type="assistant",
+                    content=reply_buffer,
+                    token_count=-1
+                )
+                await ConversationRepository.touch(db, conversation)
+
+                db.commit()
+            except Exception as e:
+                print(f"保存消息失败: {e}")
+                db.rollback()

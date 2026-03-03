@@ -1,3 +1,4 @@
+import asyncio
 
 from fastapi import APIRouter, Depends, UploadFile, File, Form
 
@@ -8,7 +9,7 @@ from app.schemas.voice import TTSRequest
 from app.services.ars_service import ASRService
 from app.services.chat_service import ChatService
 from app.services.tts_service import TTSService
-
+from fastapi.responses import StreamingResponse
 router = APIRouter()
 
 logger = get_logger(__name__)
@@ -30,6 +31,48 @@ async def send_chat(
     return {"reply": reply
             }
 
+@router.post("/stream")
+async def send_chat_stream(
+        req: ChatRequest,
+        db=Depends(get_db),
+        user=Depends(get_current_user)
+):
+    async def generator():
+        try:
+            async for token in ChatService.send_message_stream(
+                    db=db,
+                    user_id=user.id,
+                    character_id=req.character_id,
+                    content=req.message
+            ):
+                logger.info(f"发送chunk: {token[:20]}...")
+
+                yield token
+                # 🔥 强制让出事件循环，确保数据被发送
+                await asyncio.sleep(0.0001)
+
+        except Exception as e:
+            print(f"流式生成器错误: {e}")
+            import traceback
+            traceback.print_exc()
+            yield f"\n\n[连接中断: {str(e)}]"
+
+    return StreamingResponse(
+        generator(),
+        media_type="text/plain; charset=utf-8",
+        # headers={
+        #     "Cache-Control": "no-cache",
+        #     "Connection": "keep-alive",
+        #     "Content-Type": "text/plain; charset=utf-8",
+        # }
+        headers={
+            "Cache-Control": "no-cache, no-transform",  # 🔥 禁止转换
+            "Connection": "keep-alive",
+            "Content-Type": "text/plain; charset=utf-8",
+            "X-Accel-Buffering": "no",  # 🔥 禁用 Nginx 缓冲
+            "Transfer-Encoding": "chunked",
+        }
+    )
 
 """
     播放文本的语音
