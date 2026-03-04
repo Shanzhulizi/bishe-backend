@@ -16,6 +16,7 @@ import json
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from pathlib import Path
+
 router = APIRouter()
 service = CharacterService(CharacterRepository())
 
@@ -24,6 +25,7 @@ logger = get_logger(__name__)
 # 确保头像目录存在
 AVATAR_DIR = Path("static/avatars")
 AVATAR_DIR.mkdir(parents=True, exist_ok=True)
+
 
 # @router.post("/create", response_model=CharacterResponse)
 # def create_character(data: CharacterCreate, db: Session = Depends(get_db)):
@@ -40,15 +42,14 @@ AVATAR_DIR.mkdir(parents=True, exist_ok=True)
 #     }
 
 
-
 @router.post("/create", response_model=CharacterResponse)
 def create_character(
-    name: str = Form(...),
-    description: str = Form(None),
-    worldview: str = Form(None),
-    tags: str = Form(""),
-    avatar: UploadFile = File(None),
-    db: Session = Depends(get_db),
+        name: str = Form(...),
+        description: str = Form(None),
+        worldview: str = Form(None),
+        tags: str = Form(""),
+        avatar: UploadFile = File(None),
+        db: Session = Depends(get_db),
 ):
     logger.info(f"name:{name}")
     logger.info(f"description:{description}")
@@ -91,9 +92,6 @@ def create_character(
     }
 
 
-
-
-
 @router.get("/list")
 def list_characters(db: Session = Depends(get_db)):
     """
@@ -103,7 +101,8 @@ def list_characters(db: Session = Depends(get_db)):
     logger.info(f"获取所有角色基本信息成功，数量：{len(chars)}")
     # 返回统一格式
     return ResponseModel.success(
-        data=[dict(id=c.id, name=c.name, avatar=c.avatar, description=c.description) for c in chars])
+        data=[dict(id=c.id, name=c.name, avatar=c.avatar, description=c.description, like_count=c.like_count) for c in
+              chars])
 
 
 """

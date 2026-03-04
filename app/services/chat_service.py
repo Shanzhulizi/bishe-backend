@@ -6,6 +6,7 @@ from app.core.logging import get_logger
 from app.repositories.character_repo import CharacterRepository
 from app.repositories.conversation_repo import ConversationRepository
 from app.repositories.message_repo import MessageRepository
+from app.services.character_stat_service import CharacterStatService
 
 logger = get_logger(__name__)
 
@@ -163,6 +164,10 @@ class ChatService:
                 await ConversationRepository.touch(db, conversation)
 
                 db.commit()
+
+                # 为推荐算法记录对话数据
+                # TODO 为推荐算法记录对话数据
+                CharacterStatService.record_chat(db, character_id, user_id)
             except Exception as e:
                 print(f"保存消息失败: {e}")
                 db.rollback()

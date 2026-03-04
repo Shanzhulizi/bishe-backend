@@ -25,6 +25,10 @@ class ResponseCode(IntEnum):
     CHAT_FORBIDDEN = 40002
     NOT_FOUND = 40004
     SERVICE_ERROR = 40005
+    LIKE_FAILED = 40006
+    UNLIKE_FAILED = 40007
+    INTERNAL_ERROR = 40008
     # ===== AI / 系统 =====
     MODEL_ERROR = 50001
     RATE_LIMIT = 50002
+

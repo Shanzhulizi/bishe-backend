@@ -2,11 +2,13 @@ from typing import Optional
 
 from sqlalchemy.orm import Session, joinedload
 
+from app.api.deps import get_current_user
 from app.models.character import Character
 from app.models.character_configs import CharacterConfigs
+from app.models.character_usage import CharacterLike
 
 
-class CharacterRepository:
+class CharacterLikeRepository:
 
     def create_character(self, db: Session,
 
@@ -60,3 +62,20 @@ class CharacterRepository:
             Character.description,
             Character.like_count
         ).all()
+
+    @classmethod
+    def get_like_status(cls, db, id, character_id):
+
+        is_liked = db.query(CharacterLike).filter(
+            CharacterLike.character_id == character_id,
+            CharacterLike.user_id == id
+        ).first() is not None
+        return is_liked
+
+    @classmethod
+    def batch_get_like_status(cls, db, id, character_ids):
+        likes = db.query(CharacterLike).filter(
+            CharacterLike.character_id.in_(character_ids),
+            CharacterLike.user_id == id
+        ).all()
+        return likes
