@@ -45,7 +45,7 @@ async def send_chat_stream(
                     character_id=req.character_id,
                     content=req.message
             ):
-                logger.info(f"发送chunk: {token[:20]}...")
+                # logger.info(f"发送chunk: {token[:20]}...")
 
                 yield token
                 # 🔥 强制让出事件循环，确保数据被发送
@@ -60,11 +60,6 @@ async def send_chat_stream(
     return StreamingResponse(
         generator(),
         media_type="text/plain; charset=utf-8",
-        # headers={
-        #     "Cache-Control": "no-cache",
-        #     "Connection": "keep-alive",
-        #     "Content-Type": "text/plain; charset=utf-8",
-        # }
         headers={
             "Cache-Control": "no-cache, no-transform",  # 🔥 禁止转换
             "Connection": "keep-alive",

@@ -34,12 +34,13 @@ class ChatService:
             history_msgs = await MessageRepository.get_messages_by_conversation(
                 db, conversation.id
             )
-
+            logger.info(f"完整历史消息：{history_msgs}")
             # 限制历史长度
             max_history = 10
             # 这句话的作用是 裁剪历史消息的长度，保证传给 LLM 的上下文不会太长
             recent_history = history_msgs[-max_history:] if len(history_msgs) > max_history else history_msgs
 
+            logger.info(f"切割后的历史消息：{recent_history}")
             message_history = [
                 {
                     "role": "user" if msg.sender_type == "user" else "assistant",
@@ -112,11 +113,18 @@ class ChatService:
         history_msgs = await MessageRepository.get_messages_by_conversation(
             db, conversation.id
         )
-
+        history_msgs.reverse()
+        for msg in history_msgs:
+            logger.info(f"历史消息：{msg.sender_type} - {msg.content}")
+        # logger.info(f"完整历史消息：{history_msgs}")
         # 限制历史长度
-        max_history = 10
+        max_history = 20
         # 这句话的作用是 裁剪历史消息的长度，保证传给 LLM 的上下文不会太长
         recent_history = history_msgs[-max_history:] if len(history_msgs) > max_history else history_msgs
+
+        # logger.info(f"切割后的历史消息：{recent_history}")
+        for msg in recent_history:
+            logger.info(f"切割后的历史消息：{msg.sender_type} - {msg.content}")
 
         message_history = [
             {
@@ -129,7 +137,7 @@ class ChatService:
         # 4️⃣ 构建 system prompt + 历史
         character = CharacterRepository.get_by_id(db, character_id)
         messages_for_llm = build_system_prompt(character, content, message_history)
-
+        logger.info(f"提示词：{messages_for_llm}")
         try:
             async for token in chat_completion_stream(messages_for_llm):
                 reply_buffer += token

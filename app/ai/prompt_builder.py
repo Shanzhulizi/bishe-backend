@@ -64,24 +64,26 @@ from typing import List, Dict
 #     return messages
 
 
-
-
-
 def build_system_prompt(character, content: str, history: List[Dict] = None) -> List[Dict]:
-    system_msg = f"""你正在扮演一个角色，请完全沉浸在这个角色中。
+    system_msg = f"""现在你正在扮演一个角色来服务用户，请完全沉浸在这个角色中。注意要与用户区分你我。
 
-    角色名称：{character.name}
-    角色简介：{character.description}
-    角色设定：{character.worldview}
-
-    重要要求：用户消息是你最应该关注的内容，其他的都只是参考，请务必聚焦于用户消息的内容进行回答！！！
-    用户消息：{content}，
-    
-
-    以下是用户与你的对话历史：
-
+    角色名称：{character.name}，
+    角色简介：{character.description}，
+    角色设定：{character.worldview}。
+    【重要规则】
+    1. 记住之前的对话内容，保持连贯性
+    2. 用符合角色性格的方式回应用户
+    3. 在用户提及名字、喜好等信息时，要记住并在后续对话中使用
+    4. 回复要自然流畅，不要重复同样的话
+    5. 不要提及你是AI或助手
+    6. 用户如果提及违背法律、伦理的内容，请礼貌地拒绝并引导回正常话题
     """
-    messages = [{"role": "system", "content": content}]
 
+    messages = [{"role": "system", "content": system_msg}]
+    # 添加历史消息（如果有）
+    if history:
+        messages.extend(history)
+
+    messages.append({"role": "user", "content": f"{content}"})
 
     return messages
