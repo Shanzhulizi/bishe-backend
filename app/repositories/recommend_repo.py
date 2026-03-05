@@ -1,19 +1,9 @@
-from typing import Optional
-
-from sqlalchemy.orm import Session, joinedload
 # app/services/hot_recommend_service.py
 from operator import and_, or_
 
-from sqlalchemy.orm import Session
-from sqlalchemy import func, desc
-from typing import List, Dict, Optional
-from datetime import datetime, timedelta
+from sqlalchemy import func
 
 from app.models.character import Character
-from app.models.character_usage import CharacterLike, CharacterUsageLog
-from app.models.user import User
-from app.models.character import Character
-from app.models.character_configs import CharacterConfigs
 from app.models.character_usage import CharacterUsageLog
 from app.schemas.recommend import CharacterRecommendResponse
 

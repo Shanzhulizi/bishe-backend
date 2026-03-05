@@ -1,16 +1,10 @@
 # app/services/hot_recommend_service.py
-from operator import and_, or_
 
-from sqlalchemy.orm import Session
-from sqlalchemy import func, desc
-from typing import List, Dict, Optional
 from datetime import datetime, timedelta
 
 from app.core.logging import get_logger
-from app.models.character import Character
-from app.models.character_usage import CharacterLike, CharacterUsageLog
-from app.models.user import User
 from app.repositories.recommend_repo import RecommendRepository
+
 logger= get_logger(__name__)
 
 class RecommendService:

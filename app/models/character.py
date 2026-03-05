@@ -22,6 +22,10 @@ class Character(Base):
         default="default"
     )
 
+
+    voice_code = Column(String(50), nullable=True)  # 存储声音代码
+    voice_name = Column(String(50), nullable=True)  # 存储声音名称（可选）
+
     # 新增统计字段
     usage_count = Column(Integer, default=0, nullable=False)  # 使用人数
     chat_count = Column(Integer, default=0, nullable=False)  # 对话次数

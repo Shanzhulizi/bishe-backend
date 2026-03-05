@@ -15,14 +15,16 @@ class CharacterRepository:
                          avatar: Optional[str],
                          description: Optional[str],
                          worldview: Optional[str],
-                         persona: dict
+                         persona: dict,
+                         voice_code: Optional[str]
                          ):
         # 创建角色基本信息
         char = Character(
             name=name,
             avatar=avatar,
             description=description,
-            worldview=worldview
+            worldview=worldview,
+            voice_code=voice_code
         )
         db.add(char)
         db.flush()  # 拿到 char.id

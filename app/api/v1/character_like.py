@@ -1,9 +1,10 @@
 # app/api/v1/character_like.py
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import Dict
 
 from app.api.deps import get_db
+from app.api.v1.auth import get_current_user
+from app.core.constants import ResponseCode
 from app.core.logging import get_logger
 from app.models.user import User
 from app.schemas.character_like import CharacterLikeCount, CharacterLike, BatchLikeStatusRequest, \
@@ -11,13 +12,6 @@ from app.schemas.character_like import CharacterLikeCount, CharacterLike, BatchL
 from app.schemas.common import ResponseModel
 from app.services.character_service import CharacterService
 from app.services.character_stat_service import CharacterStatService
-from app.api.v1.auth import get_current_user
-
-from app.models.character import Character
-
-from app.core.constants import ResponseCode
-
-from app.models.character import Character
 
 router = APIRouter()
 

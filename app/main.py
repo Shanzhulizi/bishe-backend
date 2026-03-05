@@ -34,7 +34,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="AI角色扮演聊天平台",
     description="基于FastAPI和Vue3的AI角色扮演聊天网站",
-    lifespan=lifespan,
+    # lifespan=lifespan, # 定时任务的开关
     version="1.0.0"
 )
 

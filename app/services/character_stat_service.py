@@ -1,12 +1,13 @@
 # services/character_stat_service.py
-from datetime import datetime, timedelta, timezone, date
-from sqlalchemy import func, desc, cast, Date
+from datetime import datetime, timedelta
+
 from sqlalchemy.orm import Session
 
 from app.models.character import Character
 from app.models.character_usage import CharacterUsageLog, CharacterLike
-
 from app.repositories.character_like_repo import CharacterLikeRepository
+
+
 class CharacterStatService:
 
     @staticmethod

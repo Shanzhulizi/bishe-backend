@@ -2,9 +2,7 @@ from datetime import datetime
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
-from fastapi import Depends
 
-from app.api.deps import get_db
 from app.core.logging import get_logger
 from app.db.session import SessionLocal
 from app.services.hot_recommend_service import HotRecommendService

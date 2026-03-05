@@ -2,7 +2,6 @@ from typing import Optional
 
 from sqlalchemy.orm import Session, joinedload
 
-from app.api.deps import get_current_user
 from app.models.character import Character
 from app.models.character_configs import CharacterConfigs
 from app.models.character_usage import CharacterLike

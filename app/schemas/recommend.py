@@ -6,8 +6,10 @@
 
 
 
+from typing import Optional
+
 from pydantic import BaseModel
-from typing import List, Optional
+
 
 # 1. 定义 Pydantic 模型（用于序列化）
 class CharacterRecommendResponse(BaseModel):

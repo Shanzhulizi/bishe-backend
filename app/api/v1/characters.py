@@ -1,21 +1,17 @@
 import shutil
+import uuid
+from pathlib import Path
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, UploadFile, File, Form
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, get_current_user
+from app.api.deps import get_db
 from app.core.logging import get_logger
 from app.repositories.character_repo import CharacterRepository
 from app.schemas.character import CharacterCreate
 from app.schemas.character import CharacterResponse
 from app.schemas.common import ResponseModel
 from app.services.character_service import CharacterService
-import os
-import uuid
-import json
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
-from sqlalchemy.orm import Session
-from pathlib import Path
 
 router = APIRouter()
 service = CharacterService(CharacterRepository())
@@ -50,12 +46,15 @@ def create_character(
         tags: str = Form(""),
         avatar: UploadFile = File(None),
         db: Session = Depends(get_db),
+
+        voice_code: str = Form(None),  # 新增
 ):
     logger.info(f"name:{name}")
     logger.info(f"description:{description}")
     logger.info(f"worldview:{worldview}")
     logger.info(f"tags:{tags}")
     logger.info(f"avatar:{avatar}")
+    logger.info(f"voice_code:{voice_code}")
     avatar_url = None
     logger.info("test")
     if avatar:
@@ -77,6 +76,7 @@ def create_character(
         description=description,
         worldview=worldview,
         tags=tag_list,
+        voice_code=voice_code
     )
 
     char = service.create_character(db, data)
@@ -89,6 +89,7 @@ def create_character(
         "worldview": char.worldview,
         "is_active": True,
         "persona": char.config.persona if char.config else {},
+        "voice_code":char.voice_code
     }
 
 
@@ -123,4 +124,5 @@ def get_character_by_id(character_id: int, db: Session = Depends(get_db)):
         "name": char.name,
         "avatar": char.avatar,
         "description": char.description,
+        "voice_code": char.voice_code,
     }

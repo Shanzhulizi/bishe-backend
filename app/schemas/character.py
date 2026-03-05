@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -41,7 +41,7 @@ class CharacterCreate(BaseModel):
     worldview: Optional[str] = None
     # voice: string
     tags: list[str] = []
-
+    voice_code: Optional[str] = None  # 新增
 
 class CharacterResponse(BaseModel):
     id: int
@@ -52,6 +52,7 @@ class CharacterResponse(BaseModel):
     is_active: bool = True
     persona: Optional[Persona] = None  # 对应 CharacterConfigs.persona
 
+    voice_code: Optional[str]= None  # 新增
     class Config:
         from_attributes = True
 

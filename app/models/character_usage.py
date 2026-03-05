@@ -1,11 +1,11 @@
 
-from app.db.base import Base  # declarative_base
-
+from datetime import datetime
 
 # models/character_usage.py
 from sqlalchemy import Column, Integer, ForeignKey, DateTime, UniqueConstraint
-from sqlalchemy.sql import func
-from datetime import datetime
+
+from app.db.base import Base  # declarative_base
+
 
 class CharacterUsageLog(Base):
     """角色使用记录（每天每个用户一条）"""

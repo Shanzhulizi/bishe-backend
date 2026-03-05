@@ -1,15 +1,21 @@
 import asyncio
 
-from fastapi import APIRouter, Depends, UploadFile, File, Form
+from fastapi import APIRouter, Depends
+from fastapi import UploadFile, File, Form
+from fastapi.responses import StreamingResponse
 
-from app.api.deps import get_current_user, get_db
+from app.api.deps import get_current_user
+from app.api.deps import get_db
 from app.core.logging import get_logger
 from app.schemas.chat import ChatRequest, ChatResponse
-from app.schemas.voice import TTSRequest
 from app.services.ars_service import ASRService
 from app.services.chat_service import ChatService
 from app.services.tts_service import TTSService
-from fastapi.responses import StreamingResponse
+
+# app/api/v1/tts.py
+# from app.models.voice import Voice
+
+
 router = APIRouter()
 
 logger = get_logger(__name__)
@@ -72,24 +78,22 @@ async def send_chat_stream(
 """
     播放文本的语音
 """
-@router.post("/tts")
-async def tts(
-    req: TTSRequest
-):
-
-    audio_url = await TTSService.text_to_speech(
-        text=req.text,
-        character_id=req.character_id,
-        voice_style=req.voice_style
-    )
-
-    return {
-        "audio_url": audio_url
-    }
-
-
-
-
+# @router.post("/tts")
+# async def tts(
+#     req: TTSRequest
+# ):
+#
+#     audio_url = await TTSService.text_to_speech(
+#         text=req.text,
+#         character_id=req.character_id,
+#         # voice_style=req.voice_style
+#         voice_code=req.voice_code
+#     )
+#
+#     return {
+#         "audio_url": audio_url
+#     }
+#
 
 
 @router.post("/voice")
