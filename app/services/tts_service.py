@@ -58,15 +58,7 @@ class TTSService:
     # 默认声音配置（备选）
     DEFAULT_VOICE = "zh-CN-XiaoxiaoNeural"
 
-    # 声音风格映射（如果需要）
-    VOICE_STYLE_MAP = {
-        "gentle": "zh-CN-XiaoxiaoNeural",  # 温柔 - 晓晓
-        "energetic": "zh-CN-XiaoyiNeural",  # 活力 - 晓伊
-        "calm": "zh-CN-YunjianNeural",  # 沉稳 - 云健
-        "humorous": "zh-CN-YunxiNeural",  # 幽默 - 云希
-        "professional": "zh-CN-YunyangNeural",  # 专业 - 云扬
-        "cute": "zh-CN-XiaomengNeural",  # 可爱 - 晓萌
-    }
+
 
     @staticmethod
     async def text_to_speech(
