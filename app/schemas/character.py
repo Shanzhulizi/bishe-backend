@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel, Field
 
@@ -54,3 +54,33 @@ class CharacterResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+
+
+class CharacterListItem(BaseModel):
+    id: int
+    name: str
+    avatar: Optional[str] = None
+    description: Optional[str] = None
+    # worldview: Optional[str] = None
+    # tags: List[str] = []
+    like_count: int = 0
+    # is_liked: bool = False
+    usage_count: int = 0
+    chat_count: int = 0
+    popularity_score: float = 0.0  # 热度得分
+    recent_usage: int = 0  # 近期使用数
+    # recent_likes: int = 0  # 近期点赞数    # 数据库没有这一项
+    # hot_level: int = 0  # 热度等级 1-5
+
+    class Config:
+        from_attributes = True
+
+
+
+
+
+
+
+

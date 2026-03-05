@@ -1,14 +1,16 @@
 import asyncio
 import platform
+from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
-from app.api.v1 import auth, characters, chat, conversation, voice, character_like
+from app.api.v1 import auth, characters, chat, conversation, voice, character_like, recommend
 from app.core.config import settings
 from app.core.logging import setup_logging
+from app.jobs.popularity_job import start_scheduler, stop_scheduler
 
 if platform.system() == "Windows":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -16,9 +18,23 @@ if platform.system() == "Windows":
 # 启动日志
 setup_logging()
 
+
+# 定时任务
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 启动时执行
+    print("🚀 应用启动中...")
+    start_scheduler()
+    yield
+    # 关闭时执行
+    print("🛑 应用关闭中...")
+    stop_scheduler()
+
+
 app = FastAPI(
     title="AI角色扮演聊天平台",
     description="基于FastAPI和Vue3的AI角色扮演聊天网站",
+    lifespan=lifespan,
     version="1.0.0"
 )
 
@@ -39,10 +55,13 @@ app.include_router(chat.router, prefix="/api/chat", tags=["聊天"])
 app.include_router(conversation.router, prefix="/api/conversation", tags=["对话"])
 app.include_router(voice.router, prefix="/api/voice", tags=["语音"])
 app.include_router(character_like.router, prefix="/api/character-like", tags=["角色点赞"])
+app.include_router(recommend.router, prefix="/api/recommend", tags=["推荐接口"])
+
 
 @app.get("/")
 async def root():
     return {"message": "AI角色扮演聊天平台API"}
+
 
 app.mount(
     "/static",
