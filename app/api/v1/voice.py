@@ -1,17 +1,25 @@
+import shutil
+import uuid
+from pathlib import Path
 from typing import List, Dict
 
 import edge_tts
-from fastapi import APIRouter, Depends
-from fastapi import UploadFile, File
+from fastapi import APIRouter, UploadFile, File, Form
+from fastapi import Depends
 
 from app.api.deps import get_current_user
+from app.core.config import settings
 from app.core.constants import ResponseCode
 from app.core.logging import get_logger
 from app.schemas.common import ResponseModel
 from app.schemas.voice import ASRResponse, TTSResponse, TTSRequest
 from app.services.ars_service import ASRService
 from app.services.tts_service import TTSService
+from app.services.voice_service import create_voice, generate_speech
 
+# app/api/v1/voice.py
+
+# router = APIRouter()
 router = APIRouter()
 
 logger = get_logger(__name__)
@@ -113,6 +121,9 @@ async def get_chinese_voices() -> ResponseModel[List[Dict]]:
         )
 
 
+from app.core.config import settings
+
+
 @router.get("/preview/{voice_code}")
 async def preview_voice(voice_code: str) -> ResponseModel:
     """
@@ -124,23 +135,32 @@ async def preview_voice(voice_code: str) -> ResponseModel:
         import hashlib
         from pathlib import Path
 
+        local_host = settings.LOCAL_HOST
+        static_dir = settings.STATIC_DIR
         preview_text = "你好，我是你的AI助手，很高兴认识你。"
-
         # 生成缓存key
         cache_key = hashlib.md5(f"{preview_text}_{voice_code}".encode()).hexdigest()
-        cache_dir = Path("static/tts_cache")
-        cache_dir.mkdir(parents=True, exist_ok=True)
-        cache_file = cache_dir / f"{cache_key}.mp3"
+
+        # ✅ 使用 settings 中的 STATIC_DIR（这是项目根目录的 static）
+        static_dir = Path(static_dir)  # 应该是 E:/Code/Python/AIChat/static
+        preview_dir = static_dir / "previews"
+        preview_dir.mkdir(parents=True, exist_ok=True)
+        cache_file = preview_dir / f"{cache_key}.mp3"
+
+        print(f"预览音频缓存路径: {cache_file}")  # 应该是 E:/Code/Python/AIChat/static/previews/xxx.mp3
 
         # 如果缓存不存在，生成音频
         if not cache_file.exists():
             communicate = edge_tts.Communicate(preview_text, voice_code)
             await communicate.save(str(cache_file))
 
+        # 返回给前端的 URL
+        audio_url = f"{local_host}/static/previews/{cache_key}.mp3"
+
         return ResponseModel.success(
             msg="获取预览成功",
             data={
-                "audio_url": f"http://localhost:8000/static/tts_cache/{cache_key}.mp3",
+                "audio_url": audio_url,
                 "voice_code": voice_code
             }
         )
@@ -150,3 +170,80 @@ async def preview_voice(voice_code: str) -> ResponseModel:
             code=ResponseCode.INTERNAL_ERROR,
             msg=f"生成预览失败: {str(e)}"
         )
+
+
+# 临时上传目录
+TEMP_DIR = Path("static/temp_uploads")
+TEMP_DIR.mkdir(parents=True, exist_ok=True)
+
+
+@router.post("/create")
+async def create_voice_api(
+        name: str = Form(...),
+        audio: UploadFile = File(...)
+):
+    """
+    创建声音 - 上传音频，返回声音ID和预览URL
+    """
+    temp_path = None
+
+    try:
+        # 保存上传的音频
+        ext = Path(audio.filename).suffix
+        temp_filename = f"temp_{uuid.uuid4().hex}{ext}"
+        temp_path = TEMP_DIR / temp_filename
+
+        with open(temp_path, "wb") as f:
+            shutil.copyfileobj(audio.file, f)
+
+        # 创建声音
+        result = create_voice(str(temp_path))
+
+        return {
+            "code": 200,
+            "msg": "声音创建成功",
+            "data": result
+        }
+
+    except Exception as e:
+        return {
+            "code": 500,
+            "msg": str(e),
+            "data": None
+        }
+    finally:
+        # 清理临时文件
+        if temp_path and temp_path.exists():
+            temp_path.unlink()
+
+
+@router.post("/speak")
+async def speak(
+        text: str = Form(...),
+        voice_id: str = Form(...)
+):
+    """
+    用已创建的声音生成语音
+    """
+    try:
+        audio_url = generate_speech(text, voice_id)
+        logger.info(f"生成语音成功，URL: {audio_url}")
+        return {
+            "code": 200,
+            "msg": "生成成功",
+            "data": {
+                "audio_url": audio_url
+            }
+        }
+    except FileNotFoundError:
+        return {
+            "code": 404,
+            "msg": "声音不存在",
+            "data": None
+        }
+    except Exception as e:
+        return {
+            "code": 500,
+            "msg": str(e),
+            "data": None
+        }

@@ -6,13 +6,14 @@ import edge_tts
 from app.core.config import settings
 from app.core.logging import get_logger
 
-logger= get_logger(__name__)
+logger = get_logger(__name__)
 # 常用中文角色（可按 character 绑定）
 VOICE_MAP = {
     "default": "zh-CN-XiaoxiaoNeural",
     "male": "zh-CN-YunxiNeural",
     "calm": "zh-CN-XiaoyiNeural",
 }
+
 
 #
 # class TTSService:
@@ -31,7 +32,7 @@ VOICE_MAP = {
 #             voice = VOICE_MAP.get(voice_style, VOICE_MAP["default"])
 #
 #             filename = f"{uuid.uuid4().hex}.mp3"
-#             save_dir = os.path.join(settings.STATIC_DIR, "tts")
+#             save_dir = os.path.join(settings.AUDIO_DIR, "tts")
 #
 #             os.makedirs(save_dir, exist_ok=True)
 #
@@ -57,8 +58,6 @@ VOICE_MAP = {
 class TTSService:
     # 默认声音配置（备选）
     DEFAULT_VOICE = "zh-CN-XiaoxiaoNeural"
-
-
 
     @staticmethod
     async def text_to_speech(
@@ -88,7 +87,7 @@ class TTSService:
             filename = f"{uuid.uuid4().hex}.mp3"
 
             # 确保保存目录存在
-            save_dir = Path(settings.STATIC_DIR) / "tts"
+            save_dir = Path(settings.AUDIO_DIR) / "tts"
             save_dir.mkdir(parents=True, exist_ok=True)
 
             file_path = save_dir / filename
@@ -109,7 +108,8 @@ class TTSService:
 
             # 返回URL
             # 开发环境
-            return f"http://localhost:8000/static/tts/{filename}"
+            return settings.AUDIO_DIR +"/"+  filename
+            # f"http://localhost:8000/static/tts/{filename}"
 
             # 生产环境（根据配置返回）
             # return f"{settings.API_BASE_URL}/static/tts/{filename}"

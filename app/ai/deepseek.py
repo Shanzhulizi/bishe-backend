@@ -13,7 +13,7 @@ from app.core.config import settings
 
 async def deepseek_chat(messages: List[Dict]) -> LLMResponse:
     payload = {
-        "model": settings.DEEPSEEK_MODEL,
+        "models": settings.DEEPSEEK_MODEL,
         "messages": messages,
         "temperature": 0.7,
         "max_tokens": 2000,

@@ -6,6 +6,7 @@ from pydantic_settings import SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+# print(f"加载配置，BASE_DIR={BASE_DIR}")
 
 class Settings(BaseSettings):
     # API配置
@@ -53,6 +54,24 @@ class Settings(BaseSettings):
         case_sensitive=True,
     )
 
+    LOCAL_HOST :str= "http://localhost:8000"
+    STATIC_DIR :str= "E:/Code/Python/AIChat/static"
+
     # 语音文件存储路径
-    STATIC_DIR: str = str(BASE_DIR / "app" / "static")
+    AUDIO_DIR: str = str(BASE_DIR / "static" / "audio_files")
+
+    # XTTS 模型路径
+    XTTS_MODEL_DIR: Path = BASE_DIR / "models" / "xtts"
+
+    # 声音模型存储路径
+    VOICE_MODELS_DIR: Path = BASE_DIR / "static" / "voice_models"
+
+    # 临时音频文件路径
+    TEMP_AUDIO_DIR: Path = BASE_DIR / "static" / "temp_audio"
+
+    AUDIO_FILES_DIR: Path = BASE_DIR /  "static" / "audio_files"
+
+    AVATAR_IMAGES_DIR: Path = BASE_DIR / "static" / "avatars"
+
+
 settings = Settings()

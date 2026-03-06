@@ -7,8 +7,8 @@ tests/
 # 下载的模型存放目录
 models
 # 下载模型用的代码
-download_model.py
-
+scripts/download_model.py
+scripts/*
 app/static/*
 
 app/logs/*
@@ -16,3 +16,8 @@ app/logs/*
 .gitignore
 
 tts_models/*
+
+
+static
+
+pictures

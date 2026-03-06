@@ -1,6 +1,5 @@
 import shutil
 import uuid
-from pathlib import Path
 
 from fastapi import APIRouter, Depends, UploadFile, File, Form
 from sqlalchemy.orm import Session
@@ -18,8 +17,9 @@ service = CharacterService(CharacterRepository())
 
 logger = get_logger(__name__)
 
+from app.core.config import settings
 # 确保头像目录存在
-AVATAR_DIR = Path("static/avatars")
+AVATAR_DIR = settings. AVATAR_IMAGES_DIR
 AVATAR_DIR.mkdir(parents=True, exist_ok=True)
 
 

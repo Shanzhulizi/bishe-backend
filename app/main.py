@@ -1,13 +1,14 @@
 import asyncio
 import platform
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
-from app.api.v1 import auth, characters, chat, conversation, voice, character_like, recommend
+from app.api.v1 import auth, characters, chat, conversation, voice, character_like, recommend, xtts
 from app.core.config import settings
 from app.core.logging import setup_logging
 from app.jobs.popularity_job import start_scheduler, stop_scheduler
@@ -47,6 +48,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+# 关键：挂载静态文件服务
+# 将 /static 路径映射到项目的 static 目录
+static_path = Path(__file__).parent.parent / "static"
+app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
+
 # 注册路由
 app.include_router(auth.router, prefix="/api/auth", tags=["认证"])
 # app.include_router(users.router, prefix="/api/users", tags=["用户"])
@@ -56,6 +63,7 @@ app.include_router(conversation.router, prefix="/api/conversation", tags=["对�
 app.include_router(voice.router, prefix="/api/voice", tags=["语音"])
 app.include_router(character_like.router, prefix="/api/character-like", tags=["角色点赞"])
 app.include_router(recommend.router, prefix="/api/recommend", tags=["推荐接口"])
+app.include_router(xtts.router, prefix="/api/xtts", tags=["声音接口"])
 
 
 @app.get("/")

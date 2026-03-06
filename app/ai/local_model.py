@@ -72,7 +72,7 @@ async def local_model_chat(messages: list) -> SimpleNamespace:  # 改为返回 S
 
     except ollama.ResponseError as e:
         logger.error(f"Ollama响应错误: {e.error}")
-        if "model not found" in str(e).lower():
+        if "models not found" in str(e).lower():
             raise Exception(f"模型 'qwen2.5' 未安装，请运行: ollama pull qwen2.5")
         raise Exception(f"Ollama调用失败: {str(e)}")
 

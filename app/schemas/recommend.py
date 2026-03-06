@@ -24,5 +24,5 @@ class CharacterRecommendResponse(BaseModel):
 
     # 配置支持从 ORM/Row 对象转换
     class Config:
-        orm_mode = True
+        from_attributes = True
 
