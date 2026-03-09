@@ -32,7 +32,7 @@ VOICE_MAP = {
 #             voice = VOICE_MAP.get(voice_style, VOICE_MAP["default"])
 #
 #             filename = f"{uuid.uuid4().hex}.mp3"
-#             save_dir = os.path.join(settings.AUDIO_DIR, "tts")
+#             save_dir = os.path.join(settings.AUDIO_FILES_DIR, "tts")
 #
 #             os.makedirs(save_dir, exist_ok=True)
 #
@@ -66,7 +66,7 @@ class TTSService:
             rate: str = "+0%",
             volume: str = "+0%",
             pitch: str = "+0Hz"
-    ) -> str:
+    ) :
         """
         文本转语音，返回音频URL
 
@@ -87,7 +87,7 @@ class TTSService:
             filename = f"{uuid.uuid4().hex}.mp3"
 
             # 确保保存目录存在
-            save_dir = Path(settings.AUDIO_DIR) / "tts"
+            save_dir = Path(settings.AUDIO_FILES_DIR) / "tts"
             save_dir.mkdir(parents=True, exist_ok=True)
 
             file_path = save_dir / filename
@@ -108,7 +108,7 @@ class TTSService:
 
             # 返回URL
             # 开发环境
-            return settings.AUDIO_DIR +"/"+  filename
+            return settings.AUDIO_FILES_DIR / filename
             # f"http://localhost:8000/static/tts/{filename}"
 
             # 生产环境（根据配置返回）

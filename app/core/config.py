@@ -6,6 +6,7 @@ from pydantic_settings import SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+
 # print(f"加载配置，BASE_DIR={BASE_DIR}")
 
 class Settings(BaseSettings):
@@ -54,22 +55,39 @@ class Settings(BaseSettings):
         case_sensitive=True,
     )
 
-    LOCAL_HOST :str= "http://localhost:8000"
-    STATIC_DIR :str= "E:/Code/Python/AIChat/static"
+    LOCAL_HOST: str = "http://localhost:8000"
+    STATIC_DIR: str = "E:/Code/Python/AIChat/static"
 
     # 语音文件存储路径
-    AUDIO_DIR: str = str(BASE_DIR / "static" / "audio_files")
+    # AUDIO_FILES_DIR: str = str(BASE_DIR / "static" / "audio_files")
+    AUDIO_FILES_DIR: Path = BASE_DIR / "static" / "audio_files"
 
     # XTTS 模型路径
     XTTS_MODEL_DIR: Path = BASE_DIR / "models" / "xtts"
+
+    # # CosyVoice 源码路径（你的本地路径）
+    # COSYVOICE_PATH = r"E:\Code\Python\AIChat\CosyVoice"
+    #
+    # # CosyVoice 模型路径（你的本地模型路径）
+    # COSYVOICE_MODEL_DIR = r"E:\Code\Python\AIChat\models\iic\CosyVoice2-0.5B"
+    # COSYVOICE2_MODEL_DIR = r"E:\Code\Python\AIChat\models\iic\CosyVoice2-0.5B"
+
+    # CosyVoice 源码路径（你的本地路径）
+    COSYVOICE_PATH: Path = BASE_DIR / "CosyVoice"
+
+    # CosyVoice 模型路径（你的本地模型路径）
+    COSYVOICE_MODEL_DIR: Path = BASE_DIR / "models" / "iic" / "CosyVoice-300M"
+    COSYVOICE2_MODEL_DIR: Path = BASE_DIR / "models" / "iic" / "CosyVoice2-0.5B"
+
+    # CosyVoice 声音输出路径
+    COSYVOICE_OUTPUT_DIR: Path = BASE_DIR / "static" / "cosyvoice_output"
+    COSYVOICE2_OUTPUT_DIR: Path = BASE_DIR / "static" / "cosyvoice2_output"
 
     # 声音模型存储路径
     VOICE_MODELS_DIR: Path = BASE_DIR / "static" / "voice_models"
 
     # 临时音频文件路径
     TEMP_AUDIO_DIR: Path = BASE_DIR / "static" / "temp_audio"
-
-    AUDIO_FILES_DIR: Path = BASE_DIR /  "static" / "audio_files"
 
     AVATAR_IMAGES_DIR: Path = BASE_DIR / "static" / "avatars"
 

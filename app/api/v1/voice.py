@@ -15,7 +15,6 @@ from app.schemas.common import ResponseModel
 from app.schemas.voice import ASRResponse, TTSResponse, TTSRequest
 from app.services.ars_service import ASRService
 from app.services.tts_service import TTSService
-from app.services.voice_service import create_voice, generate_speech
 
 # app/api/v1/voice.py
 
@@ -171,79 +170,3 @@ async def preview_voice(voice_code: str) -> ResponseModel:
             msg=f"生成预览失败: {str(e)}"
         )
 
-
-# 临时上传目录
-TEMP_DIR = Path("static/temp_uploads")
-TEMP_DIR.mkdir(parents=True, exist_ok=True)
-
-
-@router.post("/create")
-async def create_voice_api(
-        name: str = Form(...),
-        audio: UploadFile = File(...)
-):
-    """
-    创建声音 - 上传音频，返回声音ID和预览URL
-    """
-    temp_path = None
-
-    try:
-        # 保存上传的音频
-        ext = Path(audio.filename).suffix
-        temp_filename = f"temp_{uuid.uuid4().hex}{ext}"
-        temp_path = TEMP_DIR / temp_filename
-
-        with open(temp_path, "wb") as f:
-            shutil.copyfileobj(audio.file, f)
-
-        # 创建声音
-        result = create_voice(str(temp_path))
-
-        return {
-            "code": 200,
-            "msg": "声音创建成功",
-            "data": result
-        }
-
-    except Exception as e:
-        return {
-            "code": 500,
-            "msg": str(e),
-            "data": None
-        }
-    finally:
-        # 清理临时文件
-        if temp_path and temp_path.exists():
-            temp_path.unlink()
-
-
-@router.post("/speak")
-async def speak(
-        text: str = Form(...),
-        voice_id: str = Form(...)
-):
-    """
-    用已创建的声音生成语音
-    """
-    try:
-        audio_url = generate_speech(text, voice_id)
-        logger.info(f"生成语音成功，URL: {audio_url}")
-        return {
-            "code": 200,
-            "msg": "生成成功",
-            "data": {
-                "audio_url": audio_url
-            }
-        }
-    except FileNotFoundError:
-        return {
-            "code": 404,
-            "msg": "声音不存在",
-            "data": None
-        }
-    except Exception as e:
-        return {
-            "code": 500,
-            "msg": str(e),
-            "data": None
-        }
