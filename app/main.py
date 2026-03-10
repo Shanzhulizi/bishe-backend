@@ -18,6 +18,19 @@ from app.jobs.popularity_job import start_scheduler, stop_scheduler
 if platform.system() == "Windows":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
+
+#-------------------------------------------------------------
+
+# 1. 获取当前 Python 环境下的 torch lib 路径
+import torch,os
+torch_lib_path = os.path.join(os.path.dirname(torch.__file__), 'lib')
+
+# 2. 将该路径添加到系统 PATH 的最前面 (Windows 关键步骤)
+os.environ['PATH'] = torch_lib_path + os.pathsep + os.environ.get('PATH', '')
+
+
+#-------------------------------------------------------------
+
 # 启动日志
 setup_logging()
 
