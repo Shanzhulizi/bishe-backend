@@ -70,11 +70,11 @@ async def list_voices(skip: int = 0, limit: int = 100):
 
 @router.post("/generate")
 async def generate_voice(request: GenerateRequest):
-    tex t= request.text,
+    text= request.text,
     if isinstance(text, tuple):
         text = text[0]  # 提取第一个元素
     # print(text)
-    voice_i d =request.voice_id
+    voice_id =request.voice_id
 
     logger.info(f"Generating voice for voice_id={voice_id} with text='{text}'")
 
