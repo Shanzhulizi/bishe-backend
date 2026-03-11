@@ -1,27 +1,130 @@
-import shutil
-import uuid
-from pathlib import Path
-from typing import List, Dict
-
-import edge_tts
-from fastapi import APIRouter, UploadFile, File, Form
-from fastapi import Depends
-
-from app.api.deps import get_current_user
-from app.core.config import settings
+from app.services.cosyvoice2_service import cosyvoice2_service
 from app.core.constants import ResponseCode
-from app.core.logging import get_logger
 from app.schemas.common import ResponseModel
 from app.schemas.voice import ASRResponse, TTSResponse, TTSRequest
 from app.services.ars_service import ASRService
 from app.services.tts_service import TTSService
+from typing import List, Dict
+import edge_tts
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
 
-# app/api/v1/voice.py
+from app.api.deps import get_current_user
+from app.core.logging import get_logger
 
-# router = APIRouter()
+# from app.services import cosyvoice_service
+from app.models.user import User
+from app.schemas.cosyvoice import GenerateRequest
+from app.services.cosyvoice_service import cosyvoice_service
+from app.services.voice_service import VoiceService
+
+from app.core.config import settings
+
 router = APIRouter()
 
 logger = get_logger(__name__)
+voice_service = VoiceService()
+
+
+@router.post("/create")
+async def create_voice(
+        voice_name: str = Form(...),
+        voice_text: str = Form(...),
+        audio: UploadFile = File(...),
+        current_user: User = Depends(get_current_user)
+):
+    try:
+        voice_result = await voice_service.save_voice(audio, voice_name, voice_text, current_user.id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return {
+        "code": 200,
+        "message": "语音保存成功",
+        "data": {
+            "voice_id": voice_result["voice_id"],
+            "voice_wav_url": voice_result["voice_url"],
+            "duration": voice_result["duration"]
+        }
+    }
+
+
+@router.get("/voices", summary="获取所有声音")
+async def list_voices(skip: int = 0, limit: int = 100):
+    """获取所有已保存的声音"""
+    voices = voice_service.get_all_voices(skip, limit)
+    # voices = db.list_voices(skip, limit)
+
+    # 手动将每个 Voice 对象转换为字典
+    voices_data = []
+    for v in voices:
+        voice_dict = {
+            "voice_id": v.voice_id,
+            "voice_name": v.voice_name,
+            "voice_text": v.voice_text,
+            "voice_url": v.voice_url,
+            "duration": v.duration,
+            "sample_rate": getattr(v, 'sample_rate', None),
+            "created_at": v.created_at.isoformat() if v.created_at else None,
+            "user_id": v.user_id
+        }
+        voices_data.append(voice_dict)
+
+    return {
+        "code": 200,
+        "message": "语音保存成功",
+        "data": {
+
+            "voices": voices_data
+        }
+
+    }
+
+
+@router.post("/cosyvoice/generate")
+async def generate_voice(request: GenerateRequest):
+    text = request.text,
+    if isinstance(text, tuple):
+        text = text[0]  # 提取第一个元素
+    # print(text)
+    voice_id = request.voice_id
+
+    logger.info(f"Generating voice for voice_id={voice_id} with text='{text}'")
+
+    audio_url = cosyvoice_service.generate(
+        text,
+        voice_id
+    )
+
+    return {
+        "code": 200,
+        "message": "生成成功",
+        "audio_url": audio_url
+    }
+
+
+@router.post("/cosyvoice2/generate")
+async def generate_voice(request: GenerateRequest):
+    text = request.text,
+    if isinstance(text, tuple):
+        text = text[0]  # 提取第一个元素
+    # print(text)
+    voice_id = request.voice_id
+
+    logger.info(f"Generating voice for voice_id={voice_id} with text='{text}'")
+
+    audio_url = cosyvoice2_service.generate(
+        text,
+        voice_id
+    )
+
+    return {
+        "code": 200,
+        "message": "生成成功",
+        "audio_url": audio_url
+    }
+
+
+# =============================下面是旧接口======================================================
 
 """
     需要注意的是，这里的接口并不会在实际项目中直接使用，
@@ -35,15 +138,15 @@ logger = get_logger(__name__)
 """
 
 
-@router.post("/asr", response_model=ASRResponse)
-async def voice_asr(
-        audio: UploadFile = File(...),
-        lang: str = "zh",
-        user=Depends(get_current_user)
-):
-    audio_bytes = await audio.read()
-    text, duration = await ASRService.speech_to_text(audio_bytes, lang)
-    return {"text": text, "duration": duration}
+# @router.post("/asr", response_model=ASRResponse)
+# async def voice_asr(
+#         audio: UploadFile = File(...),
+#         lang: str = "zh",
+#         user=Depends(get_current_user)
+# ):
+#     audio_bytes = await audio.read()
+#     text, duration = await ASRService.speech_to_text(audio_bytes, lang)
+#     return {"text": text, "duration": duration}
 
 
 """
@@ -51,32 +154,32 @@ async def voice_asr(
 """
 
 
-@router.post("/tts")
-async def voice_tts(
-        req: TTSRequest
-):
-    try:
-        logger.info("开始生成语音")
-        text = req.text
-        voice_code = req.voice_code
-        # 如果没有声音代码，使用默认
-        if not voice_code:
-            # 从数据库获取默认声音，或者使用硬编码默认值
-
-            voice_code = "zh-CN-XiaoxiaoNeural"
-
-            logger.info(f"使用默认声音: {voice_code}")
-
-        audio_url = await TTSService.text_to_speech(
-            text=text,
-            voice_code=voice_code
-        )
-        logger.info(f"生成语音成功，URL: {audio_url}")
-        return ResponseModel.success(msg="语音生成成功", data=TTSResponse(audio_url=audio_url)
-                                     )
-    except Exception as e:
-        logger.error(f"生成语音失败: {e}")
-        return ResponseModel.error(code=ResponseCode.INTERNAL_ERROR, msg="语音生成失败")
+# @router.post("/tts")
+# async def voice_tts(
+#         req: TTSRequest
+# ):
+#     try:
+#         logger.info("开始生成语音")
+#         text = req.text
+#         voice_code = req.voice_code
+#         # 如果没有声音代码，使用默认
+#         if not voice_code:
+#             # 从数据库获取默认声音，或者使用硬编码默认值
+#
+#             voice_code = "zh-CN-XiaoxiaoNeural"
+#
+#             logger.info(f"使用默认声音: {voice_code}")
+#
+#         audio_url = await TTSService.text_to_speech(
+#             text=text,
+#             voice_code=voice_code
+#         )
+#         logger.info(f"生成语音成功，URL: {audio_url}")
+#         return ResponseModel.success(msg="语音生成成功", data=TTSResponse(audio_url=audio_url)
+#                                      )
+#     except Exception as e:
+#         logger.error(f"生成语音失败: {e}")
+#         return ResponseModel.error(code=ResponseCode.INTERNAL_ERROR, msg="语音生成失败")
 
 
 @router.get("/chinese")
@@ -118,9 +221,6 @@ async def get_chinese_voices() -> ResponseModel[List[Dict]]:
             code=ResponseCode.INTERNAL_ERROR,
             msg=f"获取中文声音失败: {str(e)}"
         )
-
-
-from app.core.config import settings
 
 
 @router.get("/preview/{voice_code}")
@@ -169,4 +269,3 @@ async def preview_voice(voice_code: str) -> ResponseModel:
             code=ResponseCode.INTERNAL_ERROR,
             msg=f"生成预览失败: {str(e)}"
         )
-

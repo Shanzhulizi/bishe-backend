@@ -9,8 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
 from app.api.v1 import auth, characters, chat, conversation, voice, character_like, recommend
-from app.api.v1 import cosyvoice, cosyvoice2
-# from app.api.v1 import xtts
+
 from app.core.config import settings
 from app.core.logging import setup_logging
 from app.jobs.popularity_job import start_scheduler, stop_scheduler
@@ -78,8 +77,8 @@ app.include_router(voice.router, prefix="/api/voice", tags=["语音"])
 app.include_router(character_like.router, prefix="/api/character-like", tags=["角色点赞"])
 app.include_router(recommend.router, prefix="/api/recommend", tags=["推荐接口"])
 # app.include_router(xtts.router, prefix="/api/xtts", tags=["声音接口"])
-app.include_router(cosyvoice.router, prefix="/api/cosyvoice", tags=["声音接口"])
-app.include_router(cosyvoice2.router, prefix="/api/cosyvoice2", tags=["声音接口"])
+# app.include_router(cosyvoice.router, prefix="/api/cosyvoice", tags=["声音接口"])
+# app.include_router(cosyvoice2.router, prefix="/api/cosyvoice2", tags=["声音接口"])
 
 
 @app.get("/")

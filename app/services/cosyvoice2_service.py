@@ -42,40 +42,44 @@ class CosyVoice2Service:
             fp16=False  # 必须是 False
         )
 
-    async def save_voice(self, audio, voice_name, voice_text, user_id):
-        suffix = Path(audio.filename).suffix
-        logger.info(
-            f"接收声音: voice_name={voice_name}, voice_text={voice_text}, filename={audio.filename}, suffix={suffix}")
+        # 初始化后立即修复特征提取器
+        self._fix_feat_extractor()
 
-        if not suffix or suffix not in [".wav", ".mp3"]:
-            logger.warning(f"文件格式不支持，自动转为wav：{audio.filename}")
-            raise ValueError("不支持的文件格式，请上传wav或mp3格式的音频")
-        voice_id = "voice_" + uuid.uuid4().hex[:8]
+    def _fix_feat_extractor(self):
+        """初始化时修复特征提取器"""
+        try:
+            import torch
 
-        # voice_path = os.path.join(settings.COSYVOICE_SAMPLE_DIR, f"voice_id.wav")
-        voice_path = settings.COSYVOICE2_SAMPLE_DIR / f"{voice_id}{suffix}"
-        voice_url = f"/static/cosyvoice/cosyvoice2_sample/{voice_id}{suffix}"
-        voice_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(voice_path, "wb") as f:
-            f.write(await audio.read())
+            # 获取特征提取器
+            feat_extractor = self.model.frontend.feat_extractor
 
-        # 获取音频信息
-        data, sr = sf.read(voice_path)
-        duration = round(len(data) / sr, 2)
-        logger.info(
-            f"保存声音: voice_id={voice_id}, voice_name={voice_name}, voice_text={voice_text}, wav_path={voice_path}, duration={duration}, user_id={user_id}")
+            # 正确的配置
+            n_fft = 1920
+            win_length = 1920
+            hop_length = 480
 
-        voice_repo.save_voice(voice_id, voice_name, voice_text, voice_url, duration, user_id)
+            # 创建正确的窗函数
+            correct_window = torch.hann_window(win_length)
 
-        return {
-            "voice_id": voice_id,
-            "voice_url": voice_url,
-            "duration": duration
-        }
+            # 替换窗函数
+            if hasattr(feat_extractor, 'window'):
+                feat_extractor.window = correct_window
+                print(f"✅ 窗函数已修复: 大小={len(correct_window)}")
 
-    def get_all_voices(self, skip, limit):
+            # 确保参数一致
+            if hasattr(feat_extractor, 'n_fft'):
+                feat_extractor.n_fft = n_fft
+            if hasattr(feat_extractor, 'win_length'):
+                feat_extractor.win_length = win_length
+            if hasattr(feat_extractor, 'hop_length'):
+                feat_extractor.hop_length = hop_length
 
-        return voice_repo.list_voices(skip, limit)
+            print("✅ 特征提取器初始化修复完成")
+
+        except Exception as e:
+            print(f"⚠️ 特征提取器修复失败: {e}")
+
+
 
     def generate(self, text, voice_id):
 
@@ -101,7 +105,10 @@ class CosyVoice2Service:
 
         voice = voice_repo.get_voice_by_id(voice_id)
         prompt_text = voice.voice_text
-        prompt_wav = "E:/Code/Python/AIChat" + voice.voice_url
+        BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+        prompt_wav = str(BASE_DIR) + voice.voice_url
+        logger.info(f"路径信息: BASE_DIR={BASE_DIR} ,prompt_wav={prompt_wav}")
         # text=str(text)
         output_file_name = voice_id + uuid.uuid4().hex[:16] + ".wav"
         output_file = settings.COSYVOICE2_OUTPUT_DIR / output_file_name

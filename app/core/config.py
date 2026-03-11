@@ -79,9 +79,9 @@ class Settings(BaseSettings):
     COSYVOICE_MODEL_DIR: Path = BASE_DIR / "models" / "iic" / "CosyVoice-300M"
     COSYVOICE2_MODEL_DIR: Path = BASE_DIR / "models" / "iic" / "CosyVoice2-0.5B"
 
-    # CosyVoice 声音输出路径
+    # CosyVoice 声音样本路径
     COSYVOICE_SAMPLE_DIR: Path = BASE_DIR / "static"/"cosyvoice" / "cosyvoice_sample"
-    COSYVOICE2_SAMPLE_DIR: Path = BASE_DIR / "static"/"cosyvoice" / "cosyvoice2_sample"
+    # COSYVOICE2_SAMPLE_DIR: Path = BASE_DIR / "static"/"cosyvoice" / "cosyvoice2_sample"
 
     # CosyVoice 声音输出路径
     COSYVOICE_OUTPUT_DIR: Path = BASE_DIR / "static"/"cosyvoice" / "cosyvoice_output"
