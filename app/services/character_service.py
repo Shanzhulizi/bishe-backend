@@ -15,7 +15,7 @@ class CharacterService:
     def create_character(self, db: Session, data: CharacterCreate):
         persona = PersonaBuilder.apply_tags(data.tags)
 
-        logger.info(f"voice_code:{data.voice_code}")
+        logger.info(f"voice_code:{data.voice_id}")
         return self.repo.create_character(
             db,
             name=data.name,
@@ -23,7 +23,7 @@ class CharacterService:
             description=data.description,
             worldview=data.worldview,
             persona=persona,
-            voice_code=data.voice_code
+            voice_id=data.voice_id
         )
 
     def get_character_by_id(self, db, character_id):

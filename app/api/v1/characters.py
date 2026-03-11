@@ -48,13 +48,17 @@ def create_character(
         db: Session = Depends(get_db),
 
         voice_code: str = Form(None),  # 新增
+        voice_id: str = Form(None)
 ):
-    logger.info(f"name:{name}")
-    logger.info(f"description:{description}")
-    logger.info(f"worldview:{worldview}")
-    logger.info(f"tags:{tags}")
-    logger.info(f"avatar:{avatar}")
-    logger.info(f"voice_code:{voice_code}")
+    # logger.info(f"name:{name}")
+    # logger.info(f"description:{description}")
+    # logger.info(f"worldview:{worldview}")
+    # logger.info(f"tags:{tags}")
+    # logger.info(f"avatar:{avatar}")
+    # logger.info(f"voice_code:{voice_code}")
+
+    logger.info(f"创建角色请求: name={name}, description={description}, worldview={worldview}, tags={tags}, avatar_filename={avatar.filename if avatar else 'None'}, voice_code={voice_code}, voice_id={voice_id}")
+
     avatar_url = None
     logger.info("test")
     if avatar:
@@ -76,7 +80,8 @@ def create_character(
         description=description,
         worldview=worldview,
         tags=tag_list,
-        voice_code=voice_code
+        voice_code=voice_code,
+        voice_id= voice_id
     )
 
     char = service.create_character(db, data)
@@ -89,7 +94,7 @@ def create_character(
         "worldview": char.worldview,
         "is_active": True,
         "persona": char.config.persona if char.config else {},
-        "voice_code":char.voice_code
+        "voice_id":char.voice_id
     }
 
 
@@ -124,5 +129,5 @@ def get_character_by_id(character_id: int, db: Session = Depends(get_db)):
         "name": char.name,
         "avatar": char.avatar,
         "description": char.description,
-        "voice_code": char.voice_code,
+        "voice_id": char.voice_id,
     }

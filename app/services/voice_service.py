@@ -30,7 +30,7 @@ class VoiceService:
 
         # voice_path = os.path.join(settings.COSYVOICE_SAMPLE_DIR, f"voice_id.wav")
         voice_path = settings.COSYVOICE_SAMPLE_DIR / f"{voice_id}{suffix}"
-        voice_url = f"/static/cosyvoice/cosyvoice_sample/{voice_id}{suffix}"
+        voice_url = settings.LOCAL_HOST+  f"/static/cosyvoice/cosyvoice_sample/{voice_id}{suffix}"
         voice_path.parent.mkdir(parents=True, exist_ok=True)
         with open(voice_path, "wb") as f:
             f.write(await audio.read())

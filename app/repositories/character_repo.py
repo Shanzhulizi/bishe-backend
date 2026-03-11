@@ -16,7 +16,7 @@ class CharacterRepository:
                          description: Optional[str],
                          worldview: Optional[str],
                          persona: dict,
-                         voice_code: Optional[str]
+                         voice_id: Optional[str]
                          ):
         # 创建角色基本信息
         char = Character(
@@ -24,7 +24,7 @@ class CharacterRepository:
             avatar=avatar,
             description=description,
             worldview=worldview,
-            voice_code=voice_code
+            voice_id=voice_id
         )
         db.add(char)
         db.flush()  # 拿到 char.id

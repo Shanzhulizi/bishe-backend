@@ -79,8 +79,6 @@ class CosyVoice2Service:
         except Exception as e:
             print(f"⚠️ 特征提取器修复失败: {e}")
 
-
-
     def generate(self, text, voice_id):
 
         # 检查 CUDA
@@ -106,8 +104,8 @@ class CosyVoice2Service:
         voice = voice_repo.get_voice_by_id(voice_id)
         prompt_text = voice.voice_text
         BASE_DIR = Path(__file__).resolve().parent.parent.parent
-
-        prompt_wav = str(BASE_DIR) + voice.voice_url
+        voice_path = '/static' + voice.voice_url.split('/static')[1]
+        prompt_wav = str(BASE_DIR) + voice_path
         logger.info(f"路径信息: BASE_DIR={BASE_DIR} ,prompt_wav={prompt_wav}")
         # text=str(text)
         output_file_name = voice_id + uuid.uuid4().hex[:16] + ".wav"
@@ -145,7 +143,7 @@ class CosyVoice2Service:
                 # 可选：播放提示
                 print(f"\n💡 可以用播放器打开: {os.path.abspath(output_file)}")
 
-                audio_url = f"/static/cosyvoice/cosyvoice2_output/{output_file_name}"
+                audio_url = settings.LOCAL_HOST + f"/static/cosyvoice/cosyvoice2_output/{output_file_name}"
 
                 return audio_url
 

@@ -121,9 +121,9 @@ class TTSService:
             raise e
 
     @staticmethod
-    async def get_voice_preview(voice_code: str) -> str:
+    async def get_voice_preview(voice_id: str) -> str:
         """
         获取声音预览（用固定文本）
         """
         preview_text = "你好，我是你的AI助手，很高兴认识你。"
-        return await TTSService.text_to_speech(preview_text, voice_code)
+        return await TTSService.text_to_speech(preview_text, voice_id)

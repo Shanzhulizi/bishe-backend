@@ -17,3 +17,10 @@ class TTSRequest(BaseModel):
 
 class TTSResponse(BaseModel):
     audio_url: str
+
+
+class CosyVoiceTTSRequest(BaseModel):
+    text: str
+    voice_id: str
+class CosyVoiceTTSResponse(BaseModel):
+    audio_url: str

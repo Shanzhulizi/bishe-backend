@@ -1,7 +1,7 @@
 from app.services.cosyvoice2_service import cosyvoice2_service
 from app.core.constants import ResponseCode
 from app.schemas.common import ResponseModel
-from app.schemas.voice import ASRResponse, TTSResponse, TTSRequest
+from app.schemas.voice import ASRResponse, TTSResponse, TTSRequest, CosyVoiceTTSRequest, CosyVoiceTTSResponse
 from app.services.ars_service import ASRService
 from app.services.tts_service import TTSService
 from typing import List, Dict
@@ -49,7 +49,7 @@ async def create_voice(
 
 
 @router.get("/voices", summary="获取所有声音")
-async def list_voices(skip: int = 0, limit: int = 100):
+async def list_voices(skip: int = 0, limit: int = 20):
     """获取所有已保存的声音"""
     voices = voice_service.get_all_voices(skip, limit)
     # voices = db.list_voices(skip, limit)
@@ -124,6 +124,27 @@ async def generate_voice(request: GenerateRequest):
     }
 
 
+@router.post("/cosyvoice_tts")
+async def cosyvoice_tts(
+        req: CosyVoiceTTSRequest
+):
+    try:
+        logger.info("开始生成语音")
+        text = req.text
+        voice_id = req.voice_id
+
+        audio_url = cosyvoice2_service.generate(
+            text=text,
+            voice_id=voice_id
+        )
+        logger.info(f"生成语音成功，URL: {audio_url}")
+        return ResponseModel.success(msg="语音生成成功", data=CosyVoiceTTSResponse(audio_url=audio_url)
+                                     )
+    except Exception as e:
+        logger.error(f"生成语音失败: {e}")
+        return ResponseModel.error(code=ResponseCode.INTERNAL_ERROR, msg="语音生成失败")
+
+
 # =============================下面是旧接口======================================================
 
 """
@@ -136,7 +157,6 @@ async def generate_voice(request: GenerateRequest):
 """
     语音转文字接口
 """
-
 
 # @router.post("/asr", response_model=ASRResponse)
 # async def voice_asr(
@@ -224,11 +244,11 @@ async def get_chinese_voices() -> ResponseModel[List[Dict]]:
 
 
 @router.get("/preview/{voice_code}")
-async def preview_voice(voice_code: str) -> ResponseModel:
+async def preview_voice(voice_id: str) -> ResponseModel:
     """
     获取声音预览（生成试听音频）
     """
-    logger.info(f"获取声音预览: {voice_code}")
+    logger.info(f"获取声音预览: {voice_id}")
     try:
         import edge_tts
         import hashlib
@@ -238,7 +258,7 @@ async def preview_voice(voice_code: str) -> ResponseModel:
         static_dir = settings.STATIC_DIR
         preview_text = "你好，我是你的AI助手，很高兴认识你。"
         # 生成缓存key
-        cache_key = hashlib.md5(f"{preview_text}_{voice_code}".encode()).hexdigest()
+        cache_key = hashlib.md5(f"{preview_text}_{voice_id}".encode()).hexdigest()
 
         # ✅ 使用 settings 中的 STATIC_DIR（这是项目根目录的 static）
         static_dir = Path(static_dir)  # 应该是 E:/Code/Python/AIChat/static
@@ -250,7 +270,7 @@ async def preview_voice(voice_code: str) -> ResponseModel:
 
         # 如果缓存不存在，生成音频
         if not cache_file.exists():
-            communicate = edge_tts.Communicate(preview_text, voice_code)
+            communicate = edge_tts.Communicate(preview_text, voice_id)
             await communicate.save(str(cache_file))
 
         # 返回给前端的 URL
@@ -260,7 +280,7 @@ async def preview_voice(voice_code: str) -> ResponseModel:
             msg="获取预览成功",
             data={
                 "audio_url": audio_url,
-                "voice_code": voice_code
+                "voice_id": voice_id
             }
         )
     except Exception as e:

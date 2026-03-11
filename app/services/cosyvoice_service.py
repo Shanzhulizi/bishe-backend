@@ -43,7 +43,6 @@ class CosyVoiceService:
     def __init__(self, model_path):
         self.model = CosyVoice(model_path)
 
-
     def generate(self, text, voice_id):
 
         # 检查 CUDA
@@ -54,8 +53,9 @@ class CosyVoiceService:
         voice = voice_repo.get_voice_by_id(voice_id)
         prompt_text = voice.voice_text
         BASE_DIR = Path(__file__).resolve().parent.parent.parent
-
-        prompt_wav = str(BASE_DIR )+ voice.voice_url
+        voice_path = '/static' + voice.voice_url.split('/static')[1]
+        prompt_wav = str(BASE_DIR) + voice_path
+        # prompt_wav = str(BASE_DIR )+ voice.voice_url
         logger.info(f"路径信息: BASE_DIR={BASE_DIR} ,prompt_wav={prompt_wav}")
 
         # text=str(text)
@@ -93,7 +93,7 @@ class CosyVoiceService:
                 # 可选：播放提示
                 print(f"\n💡 可以用播放器打开: {os.path.abspath(output_file)}")
 
-                audio_url = f"/static/cosyvoice/cosyvoice_output/{output_file_name}"
+                audio_url = settings.LOCAL_HOST + f"/static/cosyvoice/cosyvoice_output/{output_file_name}"
 
                 return audio_url
 
