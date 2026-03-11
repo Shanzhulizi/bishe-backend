@@ -77,7 +77,7 @@ app.include_router(conversation.router, prefix="/api/conversation", tags=["对�
 app.include_router(voice.router, prefix="/api/voice", tags=["语音"])
 app.include_router(character_like.router, prefix="/api/character-like", tags=["角色点赞"])
 app.include_router(recommend.router, prefix="/api/recommend", tags=["推荐接口"])
-app.include_router(xtts.router, prefix="/api/xtts", tags=["声音接口"])
+# app.include_router(xtts.router, prefix="/api/xtts", tags=["声音接口"])
 app.include_router(cosyvoice.router, prefix="/api/cosyvoice", tags=["声音接口"])
 app.include_router(cosyvoice2.router, prefix="/api/cosyvoice2", tags=["声音接口"])
 
