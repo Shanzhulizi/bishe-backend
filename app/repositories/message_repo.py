@@ -40,7 +40,9 @@ class MessageRepository:
                 Message.conversation_id == conversation_id,
                 Message.in_context.is_(True)
             )
-                .order_by(Message.created_at.desc())
+                .order_by(Message.created_at
+                          # .desc()
+                          )
                 .limit(limit)
         )
         result = db.execute(stmt)

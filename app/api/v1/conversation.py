@@ -27,6 +27,6 @@ async def get_history(character_id: int, db=Depends(get_db), user=Depends(get_cu
 
     msgs = await MessageRepository.get_messages_by_conversation(db, conversation.id)
     logger.info(f"获取历史消息数量 {len(msgs)}")
-    # for m in msgs:
-    #     logger.info(f"消息 {m.id} 来自 {m.sender_type} 内容 {m.content}")
+    for m in msgs:
+        logger.info(f"消息 {m.id} 来自 {m.sender_type} 内容 {m.content}")
     return {"messages": [{"id": m.id, "sender_type": m.sender_type, "content": m.content} for m in msgs]}

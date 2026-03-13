@@ -4,5 +4,7 @@
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/CosyVoice" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/CosyVoice/third_party/Matcha-TTS" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/GPT-SoVITS" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/GPT_SoVITS" vcs="Git" />
   </component>
 </project>

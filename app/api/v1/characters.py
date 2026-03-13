@@ -50,12 +50,6 @@ def create_character(
         voice_code: str = Form(None),  # 新增
         voice_id: str = Form(None)
 ):
-    # logger.info(f"name:{name}")
-    # logger.info(f"description:{description}")
-    # logger.info(f"worldview:{worldview}")
-    # logger.info(f"tags:{tags}")
-    # logger.info(f"avatar:{avatar}")
-    # logger.info(f"voice_code:{voice_code}")
 
     logger.info(f"创建角色请求: name={name}, description={description}, worldview={worldview}, tags={tags}, avatar_filename={avatar.filename if avatar else 'None'}, voice_code={voice_code}, voice_id={voice_id}")
 

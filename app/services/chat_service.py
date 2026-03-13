@@ -114,7 +114,7 @@ class ChatService:
         history_msgs = await MessageRepository.get_messages_by_conversation(
             db, conversation.id
         )
-        history_msgs.reverse()
+        # history_msgs.reverse()
         for msg in history_msgs:
             logger.info(f"历史消息：{msg.sender_type} - {msg.content}")
         # logger.info(f"完整历史消息：{history_msgs}")
@@ -123,7 +123,7 @@ class ChatService:
         # 这句话的作用是 裁剪历史消息的长度，保证传给 LLM 的上下文不会太长
         recent_history = history_msgs[-max_history:] if len(history_msgs) > max_history else history_msgs
 
-        # logger.info(f"切割后的历史消息：{recent_history}")
+        logger.info(f"切割后的历史消息：{recent_history}")
         for msg in recent_history:
             logger.info(f"切割后的历史消息：{msg.sender_type} - {msg.content}")
 
