@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 from sqlalchemy.orm import Session, joinedload
@@ -7,73 +8,42 @@ from app.models.character_usage import CharacterLike
 
 
 class CharacterLikeRepository:
+    def __init__(self, db: Session):
+        self.db = db
 
-    def create_character(self, db: Session,
-
-                         *,
-                         name: str,
-                         avatar: Optional[str],
-                         description: Optional[str],
-                         worldview: Optional[str],
-                         persona: dict
-                         ):
-        # 创建角色基本信息
-        char = Character(
-            name=name,
-            avatar=avatar,
-            description=description,
-            worldview=worldview
-        )
-        db.add(char)
-        db.flush()  # 拿到 char.id
-
-        # # 创建角色配置
-        # config = CharacterConfigs(
-        #     character_id=char.id,
-        #     persona=persona
-        # )
-        # db.add(config)
-
-        db.commit()
-        db.refresh(char)
-        return char
-
-    # 不确定是否可用
-    @staticmethod
-    def get_by_id(db: Session, character_id: int) -> Character | None:
-        return (
-            db.query(Character)
-                .options(joinedload(Character.config))  # 一次性加载 persona
-                .filter(Character.id == character_id)
-                .first()
-        )
-
-    def get_basic_by_id(self, db: Session, character_id: int) -> Character | None:
-        return db.query(Character).filter(Character.id == character_id).first()
-
-    # 获取所有角色的基本信息
-    def get_all_basic(self, db: Session):
-        return db.query(
-            Character.id,
-            Character.name,
-            Character.avatar,
-            Character.description,
-            Character.like_count
-        ).all()
-
-    @classmethod
-    def get_like_status(cls, db, id, character_id):
-
-        is_liked = db.query(CharacterLike).filter(
+    def get_like_status(self, id, character_id):
+        is_liked = self.db.query(CharacterLike).filter(
             CharacterLike.character_id == character_id,
             CharacterLike.user_id == id
         ).first() is not None
         return is_liked
 
-    @classmethod
-    def batch_get_like_status(cls, db, id, character_ids):
-        likes = db.query(CharacterLike).filter(
+    def batch_get_like_status(self, id, character_ids):
+        likes = self.db.query(CharacterLike).filter(
             CharacterLike.character_id.in_(character_ids),
             CharacterLike.user_id == id
         ).all()
         return likes
+
+    def like_character(self, character_id: int, user_id: int):
+        """点赞角色"""
+
+        # 记录点赞
+        like = CharacterLike(
+            character_id=character_id,
+            user_id=user_id,
+            created_at=datetime.now()  # 🔥 改为普通 datetime，去掉 timezone.utc
+        )
+        self.db.add(like)
+        self.db.commit()
+
+    def unlike_character(self, character_id: int, user_id: int):
+        """取消点赞角色"""
+        like = self.db.query(CharacterLike).filter(
+            CharacterLike.character_id == character_id,
+            CharacterLike.user_id == user_id
+        ).first()
+
+        if like:
+            self.db.delete(like)
+            self.db.commit()

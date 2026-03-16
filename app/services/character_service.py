@@ -92,3 +92,7 @@ class CharacterService:
         if not is_deleted:
             raise HTTPException(status_code=404, detail="删除错误")
         self.db.commit()
+
+    def get_character_like_count(self,character_id) -> int:
+        """获取角色的点赞数"""
+        return self.character_repo.get_like_count(character_id)

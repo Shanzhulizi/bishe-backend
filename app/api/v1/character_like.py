@@ -1,4 +1,4 @@
-# app/api/v1/character_like.py
+# app/api/v1/character_like_service.py
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -10,8 +10,8 @@ from app.models.user import User
 from app.schemas.character_like import CharacterLikeCount, CharacterLike, BatchLikeStatusRequest, \
     BatchLikeStatusResponse, LikeStatusResponse
 from app.schemas.common import ResponseModel
+from app.services.character_like_service import CharacterLikeService
 from app.services.character_service import CharacterService
-from app.services.character_stat_service import CharacterStatService
 
 router = APIRouter()
 
@@ -27,7 +27,8 @@ async def get_like_count(
     获取角色点赞数
     """
     try:
-        character = CharacterService.get_character_by_id(character_id)
+        character_service = CharacterService(db)
+        character = character_service.get_character(character_id)
     except Exception:
         return ResponseModel.error(code=ResponseCode.INTERNAL_ERROR, msg="获取角色信息失败")
     if not character:
@@ -47,8 +48,9 @@ async def like_character(
     """
     logger.info(f"用户 {current_user.id} 点赞角色 {character_id}")
     try:
-        result = CharacterStatService.like_character(
-            db=db,
+        character_like_service = CharacterLikeService(db)
+        character_service = CharacterService(db)
+        result = character_like_service.like_character(
             character_id=character_id,
             user_id=current_user.id
         )
@@ -57,11 +59,11 @@ async def like_character(
             raise HTTPException(status_code=400, detail="你已经点过赞了")
 
         # 获取最新的点赞数
-        character = CharacterService.get_character_by_id(character_id)
+        like_count = character_service.get_character_like_count(character_id)
 
         return ResponseModel.success(data=CharacterLike(
             character_id=character_id,
-            like_count=character.like_count,
+            like_count=like_count,
             is_liked=True))
     except Exception as e:
         return ResponseModel.error(code=ResponseCode.LIKE_FAILED, msg=str(e))
@@ -78,8 +80,9 @@ async def unlike_character(
     """
     logger.info(f"用户 {current_user.id} 取消点赞角色 {character_id}")
     try:
-        result = CharacterStatService.unlike_character(
-            db=db,
+        character_like_service = CharacterLikeService(db)
+        character_service = CharacterService(db)
+        result = character_like_service.unlike_character(
             character_id=character_id,
             user_id=current_user.id
         )
@@ -88,10 +91,10 @@ async def unlike_character(
             return ResponseModel.error(code=ResponseCode.UNLIKE_FAILED, msg="你还没有点赞")
 
         # 获取最新的点赞数
-        character = CharacterService.get_character_by_id(character_id)
+        like_count = character_service.get_character_like_count(character_id)
         return ResponseModel.success(data=CharacterLike(
             character_id=character_id,
-            like_count=character.like_count,
+            like_count=like_count,
             is_liked=False))
 
     except Exception as e:
@@ -107,7 +110,8 @@ async def get_like_status(
     """
     获取点赞状态
     """
-    is_liked = CharacterStatService.get_character_like_status(db, current_user, character_id)
+    character_like_service = CharacterLikeService(db)
+    is_liked = character_like_service.get_character_like_status( current_user.id,character_id)
 
     return ResponseModel.success(data=LikeStatusResponse(
         character_id=character_id,
@@ -125,11 +129,12 @@ async def batch_get_like_status(
     批量获取点赞状态（用于列表页）
     """
     try:
+        character_like_service = CharacterLikeService(db)
         character_ids = request.character_ids
         if not character_ids:
             return ResponseModel.success(data=BatchLikeStatusResponse(liked_map={}))
 
-        liked_map = CharacterStatService.batch_get_like_status(db, current_user, character_ids)
+        liked_map = character_like_service.batch_get_like_status( current_user, character_ids)
 
         return ResponseModel.success(
             data=BatchLikeStatusResponse(liked_map=liked_map)

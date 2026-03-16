@@ -218,9 +218,21 @@ class CharacterRepository:
             return True
         return False
 
+    def increment_like_count(self, character_id: int):
+        """增加点赞数"""
+        self.db.query(Character).filter(Character.id == character_id).update({
+            Character.like_count: Character.like_count + 1
+        })
+        self.db.flush()
 
+    def decrement_like_count(self, character_id: int):
+        """减少点赞数"""
+        self.db.query(Character).filter(Character.id == character_id).update({
+            Character.like_count: Character.like_count - 1
+        })
+        self.db.flush()
 
-#  ----------------------目前用到了这里，下面的还没有使用------------------------------------------
+    #  ----------------------目前用到了这里，下面的还没有使用------------------------------------------
 
 
 
@@ -233,12 +245,7 @@ class CharacterRepository:
         })
         self.db.flush()
 
-    def increment_like_count(self, character_id: int):
-        """增加点赞数"""
-        self.db.query(Character).filter(Character.id == character_id).update({
-            Character.like_count: Character.like_count + 1
-        })
-        self.db.flush()
+
 
     def update_popularity_score(self, character_id: int):
         """更新热度分数"""
@@ -280,3 +287,8 @@ class CharacterRepository:
         return self.db.query(character_tags).filter(
             character_tags.c.tag_id == tag_id
         ).count()
+
+    def get_like_count(self, character_id):
+        "获取某角色点赞数"
+        character = self.get_by_id(character_id)
+        return character.like_count if character else 0
