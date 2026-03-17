@@ -166,7 +166,6 @@ async def get_personalized_recommendations(
     """
     try:
         service = PreferenceService(db)
-        # TODO 以后再使用向量相似度优化偏好推荐算法，目前先使用简单的基于用户行为和SQL的推荐
         characters = service.get_personalized_recommendations(
             user_id=current_user.id,
             limit=limit,
@@ -213,7 +212,7 @@ async def get_vector_recommendations(
             user_id=current_user.id,
             limit=limit,
             days=days,
-            similarity_threshold=threshold
+            threshold=threshold
         )
 
         return RecommendResponse(
