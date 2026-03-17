@@ -3,11 +3,13 @@ from typing import List, Dict
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db
+from app.api.deps import get_db, get_current_user
 from app.core.constants import ResponseCode
 from app.core.logging import get_logger
+from app.models.user import User
 from app.schemas.common import ResponseModel
 from app.services.hot_recommend_service import HotRecommendService
+from app.services.preference_service import PreferenceService
 
 from app.services.recommend_service import RecommendService
 
@@ -282,18 +284,42 @@ async def get_popular(
 
 
 @router.get("/pretend", response_model=RecommendResponse)
-async def get_popular(
-        db: Session = Depends(get_db)
+async def get_personalized_recommendations(
+        limit: int = Query(20, ge=1, le=50),
+        days: int = Query(30, ge=7, le=90),
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
 ):
     """
-        获取用户偏好的相似角色
+    获取个性化推荐（猜你喜欢）
     """
-    service = RecommendService(db)
-    response = RecommendResponse
-    response.data
-    response.msg
+    try:
+        service = PreferenceService(db)
+        # TODO 以后再使用向量相似度优化偏好推荐算法，目前先使用简单的基于用户行为和SQL的推荐
+        characters = service.get_personalized_recommendations(
+            user_id=current_user.id,
+            limit=limit,
+            days=days
+        )
 
-    return response
+        return RecommendResponse(
+            code=200,
+            msg="获取个性化推荐成功",
+            data=characters,
+            total=len(characters),
+            scene="personalized"
+        )
+
+    except Exception as e:
+        logger.error(f"获取个性化推荐失败: {e}")
+        return RecommendResponse(
+            code=500,
+            msg="获取推荐失败",
+            data=[],
+            total=0,
+            scene="personalized"
+        )
+
 
 
 @router.get("/similar", response_model=RecommendResponse)
@@ -327,19 +353,3 @@ async def get_popular(
 
     return response
 
-
-# @router.get("/ontime", response_model=RecommendResponse)
-# async def get_popular(
-#         db: Session = Depends(get_db)
-# ):
-#     """
-#         实时推荐
-#         这是在退出某个角色的聊天界面后，随机可能会弹出这个
-#         看了这个角色的人还看了什么角色
-#     """
-#     service = RecommendService(db)
-#     response = RecommendResponse
-#     response.data
-#     response.msg
-#
-#     return response
