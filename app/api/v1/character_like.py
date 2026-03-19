@@ -10,7 +10,8 @@ from app.models.user import User
 from app.schemas.character_like import CharacterLikeCount, CharacterLike, BatchLikeStatusRequest, \
     BatchLikeStatusResponse, LikeStatusResponse
 from app.schemas.common import ResponseModel
-from app.services.character_like_service import CharacterLikeService
+from app.services.behavior_service import BehaviorService
+
 from app.services.character_service import CharacterService
 
 router = APIRouter()
@@ -28,12 +29,10 @@ async def get_like_count(
     """
     try:
         character_service = CharacterService(db)
-        character = character_service.get_character(character_id)
+        like_count = character_service.get_character_like_count(character_id)
     except Exception:
         return ResponseModel.error(code=ResponseCode.INTERNAL_ERROR, msg="获取角色信息失败")
-    if not character:
-        return ResponseModel.error(code=ResponseCode.NOT_FOUND, msg="角色不存在")
-    data = CharacterLikeCount(character_id=character_id, like_count=character.like_count)
+    data = CharacterLikeCount(character_id=character_id, like_count=like_count)
     return ResponseModel.success(data=data)
 
 
@@ -48,15 +47,21 @@ async def like_character(
     """
     logger.info(f"用户 {current_user.id} 点赞角色 {character_id}")
     try:
-        character_like_service = CharacterLikeService(db)
-        character_service = CharacterService(db)
-        result = character_like_service.like_character(
-            character_id=character_id,
-            user_id=current_user.id
-        )
 
-        if not result:
+        character_service = CharacterService(db)
+
+        behavior_service = BehaviorService(db)
+
+        result = behavior_service.get_like_record(current_user.id, character_id)
+        if result:
             raise HTTPException(status_code=400, detail="你已经点过赞了")
+        try:
+            behavior_service.record_like(user_id=current_user.id, character_id=character_id)
+            character_service.increment_like_count(character_id=character_id)
+        except Exception as e:
+            db.rollback()
+            logger.error(f"记录点赞行为或增加点赞数失败: {e}")
+            raise e
 
         # 获取最新的点赞数
         like_count = character_service.get_character_like_count(character_id)
@@ -66,6 +71,7 @@ async def like_character(
             like_count=like_count,
             is_liked=True))
     except Exception as e:
+        logger.error(f"点赞失败: {e}")
         return ResponseModel.error(code=ResponseCode.LIKE_FAILED, msg=str(e))
 
 
@@ -80,15 +86,24 @@ async def unlike_character(
     """
     logger.info(f"用户 {current_user.id} 取消点赞角色 {character_id}")
     try:
-        character_like_service = CharacterLikeService(db)
+
+
+
+        behavior_service = BehaviorService(db)
+
         character_service = CharacterService(db)
-        result = character_like_service.unlike_character(
-            character_id=character_id,
-            user_id=current_user.id
-        )
+        result = behavior_service.get_like_record(current_user.id, character_id)
 
         if not result:
             return ResponseModel.error(code=ResponseCode.UNLIKE_FAILED, msg="你还没有点赞")
+        try:
+            behavior_service.delete_records(user_id=current_user.id, character_id=character_id, behavior_type='like')
+
+            character_service.decrement_like_count(character_id=character_id)
+        except Exception as e:
+            db.rollback()
+            logger.error(f"删除点赞行为或减少点赞数失败: {e}")
+            raise e
 
         # 获取最新的点赞数
         like_count = character_service.get_character_like_count(character_id)
@@ -98,6 +113,7 @@ async def unlike_character(
             is_liked=False))
 
     except Exception as e:
+        logger.error(f"取消点赞失败: {e}")
         return ResponseModel.error(code=ResponseCode.UNLIKE_FAILED, msg="取消点赞失败: " + str(e))
 
 
@@ -110,8 +126,8 @@ async def get_like_status(
     """
     获取点赞状态
     """
-    character_like_service = CharacterLikeService(db)
-    is_liked = character_like_service.get_character_like_status( current_user.id,character_id)
+    character_service = CharacterService(db)
+    is_liked = character_service.get_character_like_status(current_user.id, character_id)
 
     return ResponseModel.success(data=LikeStatusResponse(
         character_id=character_id,
@@ -129,12 +145,12 @@ async def batch_get_like_status(
     批量获取点赞状态（用于列表页）
     """
     try:
-        character_like_service = CharacterLikeService(db)
+        character_service = CharacterService(db)
         character_ids = request.character_ids
         if not character_ids:
             return ResponseModel.success(data=BatchLikeStatusResponse(liked_map={}))
 
-        liked_map = character_like_service.batch_get_like_status( current_user, character_ids)
+        liked_map = character_service.batch_get_like_status(current_user, character_ids)
 
         return ResponseModel.success(
             data=BatchLikeStatusResponse(liked_map=liked_map)

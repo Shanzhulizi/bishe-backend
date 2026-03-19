@@ -12,6 +12,7 @@ from app.repositories.conversation_repo import ConversationRepository
 from app.repositories.message_repo import MessageRepository
 from app.schemas.page import PageParams
 from app.services.behavior_service import BehaviorService
+from app.services.character_service import CharacterService
 
 logger = get_logger(__name__)
 
@@ -274,7 +275,27 @@ class ChatService:
                         user_id,
                         character_id
                     )
+
+                    character_service = CharacterService(self.db)
+                    await loop.run_in_executor(
+                        None,
+                        character_service.increment_chat_count,
+                        character_id
+                    )
+                    await loop.run_in_executor(
+                        None,
+                        character_service.update_use_time,
+                        character_id
+                    )
+
+
+                    # 统一提交
+                    await loop.run_in_executor(None, self.db.commit)
+                    logger.info("聊天统计记录成功")
+
                 except Exception as e:
+                # 出错时统一回滚
+                    await loop.run_in_executor(None, self.db.rollback)
                     logger.error(f"记录聊天统计失败: {e}")
             else:
                 # 流式失败，确保回滚

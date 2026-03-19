@@ -37,10 +37,9 @@ class Character(Base):
 
 
     # 新增统计字段
-    usage_count = Column(Integer, default=0, nullable=False)  # 使用人数
+    view_count = Column(Integer, default=0, nullable=False)  # 使用人数
     chat_count = Column(Integer, default=0, nullable=False)  # 对话次数
     like_count = Column(Integer, default=0, nullable=False)  # 点赞人数
-    recent_usage_count = Column(Integer, default=0, nullable=False)  # 最近使用人数
     last_used_at = Column(TIMESTAMP(timezone=True), nullable=True)  # 最后使用时间
 
     # 可选：热度得分（可定时计算）

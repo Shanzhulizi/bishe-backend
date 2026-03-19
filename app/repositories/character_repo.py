@@ -108,7 +108,7 @@ class CharacterRepository:
             greeting=data.greeting,
             is_official=data.is_official,
             is_active=True,
-            usage_count=0,
+            view_count=0,
             chat_count=0,
             like_count=0,
             recent_usage_count=0,
@@ -188,7 +188,8 @@ class CharacterRepository:
             'voice_id': data.get('voice_id'),
             'greeting': data.get('greeting'),
             'is_official': data.get('is_official'),
-            'is_active': data.get('is_active')
+            'is_active': data.get('is_active'),
+            'last_used_at': data.get('last_used_at')
         }
         character = self.update_basic(character, **basic_fields)
 
@@ -227,72 +228,42 @@ class CharacterRepository:
         self.db.query(Character).filter(Character.id == character_id).update({
             Character.like_count: Character.like_count + 1
         })
-        self.db.flush()
+        self.db.commit()
 
     def decrement_like_count(self, character_id: int):
         """减少点赞数"""
         self.db.query(Character).filter(Character.id == character_id).update({
             Character.like_count: Character.like_count - 1
         })
-        self.db.flush()
-
-    #  ----------------------目前用到了这里，下面的还没有使用------------------------------------------
-
-
-
-    def increment_chat_count(self, character_id: int):
-        """增加聊天次数"""
-        self.db.query(Character).filter(Character.id == character_id).update({
-            Character.chat_count: Character.chat_count + 1,
-            Character.recent_usage_count: Character.recent_usage_count + 1,
-            Character.last_used_at: datetime.now()
-        })
-        self.db.flush()
-
-
-
-    def update_popularity_score(self, character_id: int):
-        """更新热度分数"""
-        character = self.get_by_id(character_id)
-        if character:
-            score = (
-                    character.chat_count * 0.3 +
-                    character.like_count * 0.5 +
-                    character.recent_usage_count * 0.2
-            )
-            character.popularity_score = score
-            self.db.add(character)
-            self.db.flush()
-
-    def get_popular(self, limit: int = 10) -> List[Character]:
-        """获取热门角色"""
-        return self.db.query(Character).filter(
-            Character.is_active == True
-        ).order_by(
-            Character.popularity_score.desc()
-        ).limit(limit).all()
-
-    def get_new(self, limit: int = 10) -> List[Character]:
-        """获取最新角色"""
-        return self.db.query(Character).filter(
-            Character.is_active == True
-        ).order_by(
-            Character.created_at.desc()
-        ).limit(limit).all()
-
-    def count_by_category(self, category_id: int) -> int:
-        """统计某个类别下的角色数量"""
-        return self.db.query(character_categories).filter(
-            character_categories.c.category_id == category_id
-        ).count()
-
-    def count_by_tag(self, tag_id: int) -> int:
-        """统计某个标签下的角色数量"""
-        return self.db.query(character_tags).filter(
-            character_tags.c.tag_id == tag_id
-        ).count()
+        self.db.commit()
 
     def get_like_count(self, character_id):
         "获取某角色点赞数"
         character = self.get_by_id(character_id)
         return character.like_count if character else 0
+
+    def get_chat_count(self, character_id) -> int:
+        """获取角色的聊天数"""
+        character= self.get_by_id(character_id)
+        return character.chat_count if character else 0
+
+    def increment_view_count(self, character_id: int):
+        """增加浏览次数"""
+        self.db.query(Character).filter(Character.id == character_id).update({
+            Character.view_count: Character.view_count + 1
+        })
+    def increment_chat_count(self, character_id):
+        self.db.query(Character).filter(Character.id == character_id).update({
+            Character.chat_count: Character.chat_count + 1
+        })
+
+
+
+
+
+
+
+
+
+
+

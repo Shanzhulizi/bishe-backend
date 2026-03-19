@@ -49,6 +49,7 @@ class CharacterUpdate(BaseModel):
     tag_ids: Optional[List[int]] = None
     is_official: Optional[bool] = None
     is_active: Optional[bool] = None
+    last_used_at: Optional[datetime] = None  # 添加这个字段
 
 
 # class CharacterResponse(BaseModel):
@@ -115,7 +116,7 @@ class CharacterDetailResponse(BaseModel):
     tags: List[TagResponse] = []
 
     # 统计信息
-    usage_count: int
+    view_count: int
     chat_count: int
     like_count: int
     popularity_score: float

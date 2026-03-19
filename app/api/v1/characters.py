@@ -283,6 +283,7 @@ async def update_character(
 
     service = CharacterService(db)
     char = service.update_character(character_id, data)
+    db.commit()
     return ResponseModel.success(data=char)
 
 @router.delete("/{character_id}")
