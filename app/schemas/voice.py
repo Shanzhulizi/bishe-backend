@@ -22,3 +22,10 @@ class CosyVoiceTTSRequest(BaseModel):
     voice_id: str
 class CosyVoiceTTSResponse(BaseModel):
     audio_url: str
+
+class TTSRequest(BaseModel):
+    text: str
+    voice_id: str
+
+class TTSResponse(BaseModel):
+    audio_url: str

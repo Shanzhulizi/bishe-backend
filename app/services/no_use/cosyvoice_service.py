@@ -1,5 +1,4 @@
 import hashlib
-import logging
 import os
 import sys
 from pathlib import Path
@@ -8,10 +7,9 @@ import soundfile as sf
 import torch
 
 from app.core.config import Settings
-
+from app.core.logging import get_logger
 from app.repositories import voice_repo
 from app.repositories.voice_repo import VoiceRepository
-from app.core.logging import get_logger
 
 logger = get_logger(__name__)
 

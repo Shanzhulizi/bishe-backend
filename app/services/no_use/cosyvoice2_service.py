@@ -1,5 +1,4 @@
 import hashlib
-import logging
 import os
 import sys
 import time
@@ -12,7 +11,6 @@ from app.core.config import Settings
 from app.core.logging import get_logger
 from app.repositories import voice_repo
 from app.repositories.voice_repo import VoiceRepository
-
 
 logger = get_logger(__name__)
 

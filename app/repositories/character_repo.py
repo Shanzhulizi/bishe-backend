@@ -1,8 +1,7 @@
 from datetime import datetime
 from typing import Optional, Tuple, List
 
-from sqlalchemy import or_, select
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import or_
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.category import Category
@@ -111,7 +110,6 @@ class CharacterRepository:
             view_count=0,
             chat_count=0,
             like_count=0,
-            recent_usage_count=0,
             popularity_score=0.0
         )
         self.db.add(character)

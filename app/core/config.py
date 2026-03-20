@@ -59,18 +59,8 @@ class Settings(BaseSettings):
     STATIC_DIR: str = "E:/Code/Python/AIChat/static"
 
     # 语音文件存储路径
-    # AUDIO_FILES_DIR: str = str(BASE_DIR / "static" / "audio_files")
     AUDIO_FILES_DIR: Path = BASE_DIR / "static" / "audio_files"
 
-    # XTTS 模型路径
-    XTTS_MODEL_DIR: Path = BASE_DIR / "models" / "xtts"
-
-    # # CosyVoice 源码路径（你的本地路径）
-    # COSYVOICE_PATH = r"E:\Code\Python\AIChat\CosyVoice"
-    #
-    # # CosyVoice 模型路径（你的本地模型路径）
-    # COSYVOICE_MODEL_DIR = r"E:\Code\Python\AIChat\models\iic\CosyVoice2-0.5B"
-    # COSYVOICE2_MODEL_DIR = r"E:\Code\Python\AIChat\models\iic\CosyVoice2-0.5B"
 
     # CosyVoice 源码路径（你的本地路径）
     COSYVOICE_PATH: Path = BASE_DIR / "CosyVoice"
@@ -81,19 +71,22 @@ class Settings(BaseSettings):
 
     # CosyVoice 声音样本路径
     COSYVOICE_SAMPLE_DIR: Path = BASE_DIR / "static"/"cosyvoice" / "cosyvoice_sample"
-    # COSYVOICE2_SAMPLE_DIR: Path = BASE_DIR / "static"/"cosyvoice" / "cosyvoice2_sample"
 
     # CosyVoice 声音输出路径
     COSYVOICE_OUTPUT_DIR: Path = BASE_DIR / "static"/"cosyvoice" / "cosyvoice_output"
     COSYVOICE2_OUTPUT_DIR: Path = BASE_DIR / "static" /"cosyvoice"/ "cosyvoice2_output"
 
-    # 声音模型存储路径
-    VOICE_MODELS_DIR: Path = BASE_DIR / "static" / "voice_models"
 
-    # 临时音频文件路径
-    TEMP_AUDIO_DIR: Path = BASE_DIR / "static" / "temp_audio"
 
     AVATAR_IMAGES_DIR: Path = BASE_DIR / "static" / "avatars"
 
+
+    GPT_SoVITS_OUTPUT_DIR: Path = BASE_DIR / "static" / "voice"/"gpt_sovits_output"
+    PROMPT_VOICE_DIR: Path = BASE_DIR / "static" / "voice" / "prompt_voice"
+
+
+    # HF_CACHE_DIR: Path = BASE_DIR / "models" / "hf_cache"
+    #
+    # ETHICS_MODEL_DIR: Path = BASE_DIR / "models" / "ethics"
 
 settings = Settings()

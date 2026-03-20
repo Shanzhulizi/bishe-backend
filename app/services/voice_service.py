@@ -1,4 +1,3 @@
-import logging
 import uuid
 from pathlib import Path
 
@@ -25,11 +24,11 @@ class VoiceService:
         if not suffix or suffix not in [".wav", ".mp3"]:
             logger.warning(f"文件格式不支持，自动转为wav：{audio.filename}")
             raise ValueError("不支持的文件格式，请上传wav或mp3格式的音频")
-        voice_id = "voice_" + uuid.uuid4().hex[:8]
+        voice_id = "voice_" + uuid.uuid4().hex[:16]
 
         # voice_path = os.path.join(settings.COSYVOICE_SAMPLE_DIR, f"voice_id.wav")
-        voice_path = settings.COSYVOICE_SAMPLE_DIR / f"{voice_id}{suffix}"
-        voice_url = settings.LOCAL_HOST+  f"/static/cosyvoice/cosyvoice_sample/{voice_id}{suffix}"
+        voice_path = settings.PROMPT_VOICE_DIR / f"{voice_id}{suffix}"
+        voice_url = settings.LOCAL_HOST+  f"/static/voice/prompt_voice/{voice_id}{suffix}"
         voice_path.parent.mkdir(parents=True, exist_ok=True)
         with open(voice_path, "wb") as f:
             f.write(await audio.read())

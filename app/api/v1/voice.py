@@ -1,14 +1,16 @@
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
+from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, get_db
 from app.core.constants import ResponseCode
 from app.core.logging import get_logger
 from app.models.user import User
 from app.schemas.common import ResponseModel
-from app.schemas.voice import CosyVoiceTTSRequest, CosyVoiceTTSResponse
-from app.services.cosyvoice2_service import cosyvoice2_service
+from app.schemas.voice import CosyVoiceTTSRequest, CosyVoiceTTSResponse, TTSResponse, TTSRequest
+from app.services.gpt_covits_service import GptCovitsService
 # from app.services.cosyvoice_service import cosyvoice_service
 # from app.services.cosyvoice2_stream_service import cosyvoice2_stream_service
+from app.services.no_use.cosyvoice2_service import cosyvoice2_service
 from app.services.voice_service import VoiceService
 
 router = APIRouter()
@@ -118,7 +120,8 @@ async def list_voices(skip: int = 0, limit: int = 20):
 
 @router.post("/cosyvoice_tts")
 async def cosyvoice_tts(
-        req: CosyVoiceTTSRequest
+        req: CosyVoiceTTSRequest,
+        db: Session = Depends(get_db)
 ):
     try:
         logger.info("开始生成语音")
@@ -129,8 +132,31 @@ async def cosyvoice_tts(
             text=text,
             voice_id=voice_id
         )
+
         logger.info(f"生成语音成功，URL: {audio_url}")
         return ResponseModel.success(msg="语音生成成功", data=CosyVoiceTTSResponse(audio_url=audio_url)
+                                     )
+    except Exception as e:
+        logger.error(f"生成语音失败: {e}")
+        return ResponseModel.error(code=ResponseCode.INTERNAL_ERROR, msg="语音生成失败")
+
+@router.post("/tts")
+async def generate(
+        req: TTSRequest,
+        db: Session = Depends(get_db)
+):
+    try:
+        logger.info("开始生成语音")
+        text = req.text
+        voice_id = req.voice_id
+
+        gpt_covits_service = GptCovitsService(db)
+        audio_url = gpt_covits_service.generate_voice(
+            text=text,
+            voice_id=voice_id
+        )
+        logger.info(f"生成语音成功，URL: {audio_url}")
+        return ResponseModel.success(msg="语音生成成功", data=TTSResponse(audio_url=audio_url)
                                      )
     except Exception as e:
         logger.error(f"生成语音失败: {e}")
@@ -181,7 +207,6 @@ async def cosyvoice_tts(
 """
     文本转语音接口
 """
-
 
 # @router.post("/tts")
 # async def voice_tts(
