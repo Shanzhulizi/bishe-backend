@@ -7,7 +7,9 @@ logger = get_logger(__name__)
 async def build_system_prompt(character, content: str, history: List[Dict] = None) -> List[Dict]:
     # 情感分析逻辑
 
-    emotion_result = await emotion_service.analyze_use_api(content)
+    # emotion_result = await emotion_service.analyze_use_api(content)
+    emotion_result = await emotion_service.analyze_use_model(content)
+
     logger.info(f"情感分析结果: {emotion_result['emotion']} (置信度: {emotion_result['score']:.2f})，建议回应语气: {emotion_result['tone']}"    )
     system_msg = f"""现在你正在扮演一个角色来服务用户，请完全沉浸在这个角色中。注意要与用户区分你我。
 
