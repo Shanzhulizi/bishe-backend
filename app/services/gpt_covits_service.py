@@ -10,7 +10,7 @@ from app.core.logging import get_logger
 from app.repositories.voice_repo import VoiceRepository
 
 # 设置项目根目录
-project_root = r"E:\Code\Python\AIChat_remake\GPT-SoVITS-main"
+project_root = r"E:\Code\Python\AIChat\GPT-SoVITS-main"
 
 # 先添加所有必要的路径
 paths_to_add = [
@@ -79,8 +79,8 @@ class GptCovitsService:
             cls._inference_webui = inference_webui
 
             # 硬编码模型路径
-            gpt_path = r"E:\Code\Python\AIChat_remake\GPT-SoVITS-main\GPT_SoVITS\pretrained_models\s1bert25hz-2kh-longer-epoch=68e-step=50232.ckpt"
-            sovits_path = r"E:\Code\Python\AIChat_remake\GPT-SoVITS-main\GPT_SoVITS\pretrained_models\s2G488k.pth"
+            gpt_path = r"E:\Code\Python\AIChat\GPT-SoVITS-main\GPT_SoVITS\pretrained_models\s1bert25hz-2kh-longer-epoch=68e-step=50232.ckpt"
+            sovits_path = r"E:\Code\Python\AIChat\GPT-SoVITS-main\GPT_SoVITS\pretrained_models\s2G488k.pth"
 
             # 检查文件是否存在
             if not os.path.exists(gpt_path):
@@ -176,7 +176,7 @@ class GptCovitsService:
         logger.info(f"路径信息: BASE_DIR={BASE_DIR}, prompt_wav={prompt_wav}")
 
         # 执行克隆
-        # output_path = rf"E:\Code\Python\AIChat_remake\static\gpt-covits\output\{cache_key}.wav"
+        # output_path = rf"E:\Code\Python\AIChat\static\gpt-covits\output\{cache_key}.wav"
         output_path = settings.GPT_SoVITS_OUTPUT_DIR / f"{cache_key}.wav"
 
         result = self._clone_voice(
