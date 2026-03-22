@@ -108,86 +108,8 @@ class ChatService:
     #         logger.exception("send_message failed", exc_info=e)
     #         raise
 
-    # async def send_message_stream(
-    #         self,
-    #         db: Session,
-    #         user_id: int,
-    #         character_id: int,
-    #         content: str,
-    # ):
-    #
-    #     reply_buffer = ""
-    #
-    #     # 获取或创建会话
-    #     conversation = await    self.conversation_repo.get_active(
-    #         user_id, character_id
-    #     )
-    #     if not conversation:
-    #         conversation = await self.conversation_repo.create(
-    #             user_id, character_id
-    #         )
-    #
-    #     # 准备消息历史记录（最近 N 条）
-    #     history_msgs = await         self.message_repo.get_messages_by_conversation(
-    #        conversation.id
-    #     )
-    #     # history_msgs.reverse()
-    #     for msg in history_msgs:
-    #         logger.info(f"历史消息：{msg.sender_type} - {msg.content}")
-    #     # logger.info(f"完整历史消息：{history_msgs}")
-    #     # 限制历史长度
-    #     max_history = 20
-    #     # 这句话的作用是 裁剪历史消息的长度，保证传给 LLM 的上下文不会太长
-    #     recent_history = history_msgs[-max_history:] if len(history_msgs) > max_history else history_msgs
-    #
-    #     logger.info(f"切割后的历史消息：{recent_history}")
-    #     for msg in recent_history:
-    #         logger.info(f"切割后的历史消息：{msg.sender_type} - {msg.content}")
-    #
-    #     message_history = [
-    #         {
-    #             "role": "user" if msg.sender_type == "user" else "assistant",
-    #             "content": msg.content
-    #         }
-    #         for msg in recent_history
-    #     ]
-    #
-    #     # 4️⃣ 构建 system prompt + 历史
-    #     character = self.character_repo.get_by_id(character_id)
-    #     messages_for_llm = build_system_prompt(character, content, message_history)
-    #     logger.info(f"提示词：{messages_for_llm}")
-    #     try:
-    #         async for token in chat_completion_stream(messages_for_llm):
-    #             reply_buffer += token
-    #
-    #             yield token
-    #     finally:
-    #         # ===== 流结束之后 =====
-    #         try:
-    #             await self.message_repo.create(
-    #
-    #                 conversation_id=conversation.id,
-    #                 sender_type="user",
-    #                 content=content
-    #             )
-    #
-    #             await    self.message_repo.create(
-    #
-    #                 conversation_id=conversation.id,
-    #                 sender_type="assistant",
-    #                 content=reply_buffer,
-    #                 token_count=-1
-    #             )
-    #             await    self.conversation_repo.touch(conversation)
-    #
-    #             self.db.commit()
-    #
-    #             # 为推荐算法记录对话数据
-    #             # 为推荐算法记录对话数据
-    #             CharacterStatService.record_chat(self.db, character_id, user_id)
-    #         except Exception as e:
-    #             print(f"保存消息失败: {e}")
-    #             db.rollback()
+
+
 
     async def send_message_stream(
             self,

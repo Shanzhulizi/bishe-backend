@@ -5,9 +5,12 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 
 from app.models.conversation import Conversation
+from app.models.message import Message
 from app.models.user_behavior import UserBehavior
 
+from app.core.logging import get_logger
 
+logger = get_logger(__name__)
 class ConversationRepository:
     def __init__(self, db: Session):
         self.db = db
@@ -56,67 +59,59 @@ class ConversationRepository:
         self.db.flush()  # ✅ 只 flush，不 commit
         return conv
 
-    async def get_chat_count(self, user_id: int, character_id: int) -> int:
-        """获取用户与某个角色的聊天消息数量"""
-        stmt = select(func.count()).where(
-            UserBehavior.character_id == character_id,
-            UserBehavior.user_id == user_id,
-            UserBehavior.behavior_type == 'chat'
-        )
+    # repositories/conversation_repo.py
 
-        result = self.db.execute(stmt)
-        count = result.scalar()
-
-        return count or 0
-
-    def get_summary(self, user_id, character_id):
-        # 先找到会话
-        stmt_conversation = select(Conversation.id).where(
-            Conversation.user_id == user_id,
-            Conversation.character_id == character_id
-        )
-        result = self.db.execute(stmt_conversation)
-        conversation = result.scalar_one_or_none()
-
-        if not conversation:
+    def get_summary(self, conversation_id: int) -> Optional[str]:
+        """获取会话摘要"""
+        try:
+            result = self.db.query(Conversation.summary).filter(
+                Conversation.id == conversation_id
+            ).first()
+            return result[0] if result else None
+        except Exception as e:
+            logger.error(f"获取摘要失败: {e}")
             return None
-        result = self.db.query(Conversation.summary).filter(
-            Conversation.id == conversation.id
-        ).first()
 
-        return result[0] if result else None
-    def get_summary_count(self, conversation_id):
-        result = self.db.query(Conversation.summary_count).filter(
-            Conversation.id == conversation_id
-        ).first()
-        return result[0] if result and result[0] else 0
+    def get_summary_count(self, conversation_id: int) -> int:
+        """获取已总结的消息数量"""
+        try:
+            result = self.db.query(Conversation.summary_count).filter(
+                Conversation.id == conversation_id
+            ).first()
+            return result[0] if result and result[0] else 0
+        except Exception as e:
+            logger.error(f"获取总结数量失败: {e}")
+            return 0
 
+    async def get_chat_count(self, conversation_id: int) -> int:
+        """获取会话的消息总数"""
+        try:
+            count = self.db.query(Message).filter(
+                Message.conversation_id == conversation_id
+            ).count()
+            return count
+        except Exception as e:
+            logger.error(f"获取消息数量失败: {e}")
+            return 0
 
-    def save_summary(
-            self,
-            conversation_id: int,
-            summary: str,
-            summarized_count: int
-    ) -> bool:
-        """
-        保存摘要
-        """
+    def save_summary(self, conversation_id: int, summary: str, summary_count: int) -> bool:
+        """保存摘要"""
         try:
             conversation = self.db.query(Conversation).filter(
-                Conversation.id == conversation_id,
+                Conversation.id == conversation_id
             ).first()
 
             if conversation:
                 conversation.summary = summary
-                conversation.summarized_count = summarized_count
+                conversation.summary_count = summary_count
                 conversation.summary_updated_at = datetime.now()
                 self.db.commit()
-
+                logger.info(f"保存摘要成功: conversation_id={conversation_id}, summarized_count={summary_count}")
                 return True
             else:
-
+                logger.error(f"会话不存在: {conversation_id}")
                 return False
         except Exception as e:
-            # logger.error(f"保存摘要失败: {e}")
+            logger.error(f"保存摘要失败: {e}")
             self.db.rollback()
             return False

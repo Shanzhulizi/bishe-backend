@@ -24,15 +24,15 @@ class ConversationService:
     async def build_history_summary(self, conversation_id,  user_id, character_id) -> str:
 
         # 获取现有总结和已总结数量
-        existing_summary = self.conv_repo.get_summary(user_id, character_id)
+        existing_summary = self.conv_repo.get_summary(conversation_id)
         summarized_count = self.conv_repo.get_summary_count(conversation_id)
 
         # 获取当前对话的消息总数
-        chat_count = await self.conv_repo.get_chat_count(user_id, character_id)
+        chat_count = await self.conv_repo.get_chat_count( conversation_id)
 
         # 未总结的消息数
         unsummarized_count = chat_count - summarized_count
-
+        logger.info(f"对话 {conversation_id} 的消息总数: {chat_count}, 已总结数量: {summarized_count}, 未总结数量: {unsummarized_count}")
         # 定义阈值和总结数量
         FIRST_SUMMARY_THRESHOLD = 40  # 首次总结阈值（达到40条才总结）
         FIRST_SUMMARY_COUNT = 20  # 首次总结消息数（只总结前20条）
@@ -46,6 +46,7 @@ class ConversationService:
         if summarized_count == 0:
             # 首次总结：消息数达到40条
             if chat_count >= FIRST_SUMMARY_THRESHOLD:
+                logger.info(f"对话 {conversation_id} 首次总结触发，消息总数 {chat_count} 达到阈值 {FIRST_SUMMARY_THRESHOLD}")
                 should_summarize = True
                 # 取第1页，20条（只总结前20条）
                 new_messages = self.message_service.get_history_messages(
@@ -54,7 +55,8 @@ class ConversationService:
                 )
                 new_summarized_count = FIRST_SUMMARY_COUNT
 
-        elif unsummarized_count >= INCREMENTAL_THRESHOLD:
+        elif unsummarized_count-20 >= INCREMENTAL_THRESHOLD:
+            logger.info(f"对话 {conversation_id} 增量总结触发，未总结消息数 {unsummarized_count} 达到阈值 {INCREMENTAL_THRESHOLD}")
             # 增量总结：新消息达到20条
             should_summarize = True
             # 计算页码：已总结数量 ÷ 每页数量 + 1
@@ -81,7 +83,7 @@ class ConversationService:
         self.conv_repo.save_summary(
             conversation_id=conversation_id,
             summary=new_summary,
-            summarized_count=new_summarized_count
+            summary_count=new_summarized_count
         )
 
         return new_summary or "无"
