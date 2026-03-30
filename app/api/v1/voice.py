@@ -18,7 +18,8 @@ router = APIRouter()
 logger = get_logger(__name__)
 voice_service = VoiceService()
 
-# TODO 要截断音频，最长10秒
+# TO DO 要截断音频，最长10秒
+# 不能截断，只给了提醒，截断了音频，参考文本又不能截断
 @router.post("/create")
 async def create_voice(
         voice_name: str = Form(...),
