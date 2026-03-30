@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db
 from app.core.constants import ResponseCode
@@ -37,7 +38,7 @@ def register(
 @router.post("/login", response_model=ResponseModel[LoginResponse])
 def login(
         user_in: LoginRequest,
-        db: AsyncSession = Depends(get_db),
+        db: Session = Depends(get_db),
 ):
     logger.info(f"用户登录: {user_in.username}")
     try:

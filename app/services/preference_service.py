@@ -70,7 +70,7 @@ class PreferenceService:
 
         # 2. 分析偏好
         top_categories, top_tags = self._analyze_user_preferences(behaviors)
-
+        logger.info(f"用户 {user_id} 偏好分析 - 类别: {top_categories}, 标签: {top_tags}")
         # 3. 获取已互动过的角色ID（用于排除）
         excluded_ids = self.repo.get_user_interacted_characters(user_id)
 

@@ -6,9 +6,13 @@ from fastapi.responses import StreamingResponse
 from app.api.deps import get_current_user
 from app.api.deps import get_db
 from app.core.logging import get_logger
+from app.db.session import SessionLocal
 from app.schemas.chat import ChatRequest
 from app.services.ars_service import ASRService
+from app.services.character_service import CharacterService
 from app.services.chat_service import ChatService
+from app.services.gpt_covits_service import GptCovitsService
+from app.services.voice_service import VoiceService
 
 router = APIRouter()
 
@@ -78,6 +82,8 @@ async def send_chat_stream(
 """
     播放文本的语音
 """
+
+
 # @router.post("/tts")
 # async def tts(
 #     req: TTSRequest
@@ -95,64 +101,10 @@ async def send_chat_stream(
 #     }
 #
 
-# TODO 我靠，还有个电话功能要做
-# TODO 这是将来可能做的语音通话，别给删了
-#
-# @router.post("/voice")
-# async def voice_chat(
-#     character_id: int= Form(...),
-#     audio: UploadFile = File(...),
-#     user=Depends(get_current_user),
-#     db=Depends(get_db)
-# ):
-#     # 1. ASR
-#     audio_bytes = await audio.read()
-#     logger.info(f"用户 {user.id} 发送语音消息给角色 {character_id}")
-#     logger.info(f"语音文件大小: {len(audio_bytes)} 字节")
-#     logger.info(f"语音文件: {audio_bytes[:20]}...")
-#     try:
-#         user_text, _ = await ASRService.speech_to_text(audio_bytes)
-#     except Exception as e:
-#         print("ASR 失败", e)
-#         return {
-#             "user_text": "",
-#             "reply_text": "抱歉，我的语音识别暂时无法使用，请稍后再试",
-#             "audio_url": None
-#         }
-#     logger.info(f"ASR 识别结果: {user_text}")
-#     # 2. 聊天（你现有逻辑）
-#     reply_text = await ChatService.send_message(
-#         db=db,  # 这里接你真实 db
-#         user_id=user.id,
-#         #     user_id=1,  # 临时用一个固定用户 ID
-#         character_id=character_id,
-#         content=user_text
-#     )
-#     logger.info(f"角色 {character_id} 回复用户 {user.id} 消息: {reply_text}")
-#     # 3. TTS
-#     # audio_url = await TTSService.text_to_speech(
-#     #     text=reply_text,
-#     #     character_id=character_id
-#     # )
-#
-#     try:
-#         audio_url = await TTSService.text_to_speech(
-#             text=reply_text,
-#             character_id=character_id
-#         )
-#     except Exception as e:
-#         logger.error(f"TTS 失败: {e}")
-#         audio_url = None
-#
-#     logger.info(f"TTS 生成语音 URL: {audio_url}")
-#     return {
-#         "user_text": user_text,
-#         "reply_text": reply_text,
-#         "audio_url": audio_url
-#     }
-
-
-@router.post("voice_chat")
+# TODO 语音通话功能还未测试
+# TODO 语音通话的前端还没做
+# TODO deepseek说可以用websocket，不知道怎么做
+@router.post("/voice_chat")
 async def voice_chat(
         character_id: int = Form(...),
         audio: UploadFile = File(...),
@@ -175,19 +127,38 @@ async def voice_chat(
         }
     logger.info(f"ASR 识别结果: {user_text}")
     # 2. 聊天（你现有逻辑）
-    reply_text = await ChatService.send_message_stream(
-        db=db,  # 这里接你真实 db
-        user_id=user.id,
-        #     user_id=1,  # 临时用一个固定用户 ID
-        character_id=character_id,
-        content=user_text
-    )
+    chat_service = ChatService(db)
+    # 收集所有回复片段
+    reply_buffer = ""
+    try:
+        async for token in chat_service.send_message_stream(
+                db=db,
+                user_id=user.id,
+                character_id=character_id,
+                content=user_text
+        ):
+            reply_buffer += token
+            # 可以在这里做流式处理（如果 WebSocket 的话）
+
+        reply_text = reply_buffer
+        logger.info(f"角色 {character_id} 回复用户 {user.id}: {reply_text[:100]}...")
+
+    except Exception as e:
+        logger.error(f"聊天服务失败: {e}")
+        reply_text = "抱歉，AI 服务暂时不可用，请稍后再试"
+
+
     logger.info(f"角色 {character_id} 回复用户 {user.id} 消息: {reply_text}")
     # 3. TTS
     try:
-        audio_url = await voice_service.text_to_speech(
+        character_service = CharacterService(db)
+        character = character_service.get_character(character_id)
+        voice_id = character.voice_id if character else None
+        gpt_covits_service = GptCovitsService(db)
+        logger.info(f"使用角色 {character_id} 的 voice_id {voice_id} 进行 TTS")
+        audio_url = gpt_covits_service.generate_voice(
             text=reply_text,
-            character_id=character_id
+            voice_id=voice_id
         )
     except Exception as e:
         logger.error(f"TTS 失败: {e}")

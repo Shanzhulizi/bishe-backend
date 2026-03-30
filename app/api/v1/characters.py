@@ -143,7 +143,10 @@ def get_characters(
 
     # 添加总数字段到响应头
     from fastapi.responses import JSONResponse
-    response = JSONResponse(content=[c.__dict__ for c in characters])
+    # response = JSONResponse(content=[c.__dict__ for c in characters])
+
+    data = [CharacterListItem.model_validate(c).model_dump() for c in characters]
+    response = JSONResponse(content=data)
     response.headers["X-Total-Count"] = str(total)
     return ResponseModel.success(data=characters)
 

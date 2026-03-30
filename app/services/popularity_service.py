@@ -62,7 +62,7 @@ class PopularityService:
                     (UserBehavior.behavior_type == BehaviorType.CHAT, weights['chat']),
                     (UserBehavior.behavior_type == BehaviorType.LIKE, weights['like']),
                     (UserBehavior.behavior_type == BehaviorType.VIEW, weights['view']),
-                    else_=0
+                    # else_=0
                 )
             ).label('recent_score')
         ).filter(

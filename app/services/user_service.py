@@ -1,6 +1,7 @@
 # app/api/deps.py
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 
 from app.core.constants import ResponseCode
 from app.core.logging import get_logger
@@ -52,7 +53,7 @@ def create_user(db: AsyncSession, user_in) -> User:
     return user
 
 
-def user_login(db: AsyncSession, username: str, password: str) -> str:
+def user_login(db: Session, username: str, password: str) -> str:
     user = UserRepository.get_by_username(db, username)
     logger.info(f"用户登录服务 {user.username}")
     if not user:

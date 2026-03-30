@@ -25,7 +25,8 @@ class ConversationRepository:
             Conversation.user_id == user_id,
             Conversation.character_id == character_id,
             Conversation.is_active.is_(True)
-        )
+        ).limit(1)
+
         result = self.db.execute(stmt)
         return result.scalar_one_or_none()
 
